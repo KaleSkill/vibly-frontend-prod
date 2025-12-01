@@ -201,52 +201,54 @@ const ViblyNavigation = () => {
               Home
             </a>
 
-            {/* Dynamic Categories */}
-            {Object.entries(organizedCategories).map(([key, category]) => {
-              return (
-                <div key={key} className="relative group">
-                  <button
-                    className="flex items-center space-x-1 text-white hover:text-green-400 transition-all duration-300 hover:scale-105 font-medium"
-                    onMouseEnter={() => setActiveDropdown(key)}
-                    onMouseLeave={() => setActiveDropdown(null)}
-                  >
-                    <span>{key.charAt(0).toUpperCase() + key.slice(1)}</span>
-                    <ChevronDown className="h-4 w-4" />
-                  </button>
-                  <AnimatePresence>
-                    {activeDropdown === key && (
-                      <motion.div
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: 10 }}
-                        transition={{ duration: 0.2 }}
-                        className="absolute top-full left-0 mt-2 w-64 bg-background border border-border rounded-lg shadow-xl z-50"
-                        onMouseEnter={() => setActiveDropdown(key)}
-                        onMouseLeave={() => setActiveDropdown(null)}
-                      >
-                        <div className="p-4">
-                          <div className="space-y-2">
-                            {category.subcategories.length > 0 ? (
-                              category.subcategories.map((item) => (
-                                <a
-                                  key={item.name}
-                                  href={item.href}
-                                  className="block px-3 py-2 rounded-md hover:bg-accent hover:text-accent-foreground transition-colors duration-200 text-foreground"
-                                >
-                                  <span className="text-sm font-medium">{item.name}</span>
-                                </a>
-                              ))
-                            ) : (
-                              <div className="px-3 py-2 text-sm text-muted-foreground">No products added now</div>
-                            )}
+            {/* Dynamic Categories - Only Men */}
+            {Object.entries(organizedCategories)
+              .filter(([key]) => key === 'men')
+              .map(([key, category]) => {
+                return (
+                  <div key={key} className="relative group">
+                    <button
+                      className="flex items-center space-x-1 text-white hover:text-green-400 transition-all duration-300 hover:scale-105 font-medium"
+                      onMouseEnter={() => setActiveDropdown(key)}
+                      onMouseLeave={() => setActiveDropdown(null)}
+                    >
+                      <span>{key.charAt(0).toUpperCase() + key.slice(1)}</span>
+                      <ChevronDown className="h-4 w-4" />
+                    </button>
+                    <AnimatePresence>
+                      {activeDropdown === key && (
+                        <motion.div
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: 10 }}
+                          transition={{ duration: 0.2 }}
+                          className="absolute top-full left-0 mt-2 w-64 bg-background border border-border rounded-lg shadow-xl z-50"
+                          onMouseEnter={() => setActiveDropdown(key)}
+                          onMouseLeave={() => setActiveDropdown(null)}
+                        >
+                          <div className="p-4">
+                            <div className="space-y-2">
+                              {category.subcategories.length > 0 ? (
+                                category.subcategories.map((item) => (
+                                  <a
+                                    key={item.name}
+                                    href={item.href}
+                                    className="block px-3 py-2 rounded-md hover:bg-accent hover:text-accent-foreground transition-colors duration-200 text-foreground"
+                                  >
+                                    <span className="text-sm font-medium">{item.name}</span>
+                                  </a>
+                                ))
+                              ) : (
+                                <div className="px-3 py-2 text-sm text-muted-foreground">No products added now</div>
+                              )}
+                            </div>
                           </div>
-                        </div>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </div>
-              )
-            })}
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
+                )
+              })}
           </nav>
         </div>
 
@@ -477,46 +479,12 @@ const ViblyNavigation = () => {
 
           <div className="px-2 pb-6">
             <Accordion type="single" collapsible className="w-full">
-              <AccordionItem value pre="unisex" className="border-neutral-200">
-                <AccordionTrigger className="px-3">Unisex</AccordionTrigger>
-                <AccordionContent>
-                  <div className="space-y-1">
-                    {organizedCategories.unisex.subcategories.length > 0 ? (
-                      organizedCategories.unisex.subcategories.slice(0, 12).map((item) => (
-                        <a key={item.name} href={item.href} className="block rounded-md px-3 py-1.5 text-sm text-muted-foreground hover:bg-accent hover:text-accent-foreground">
-                          {item.name}
-                        </a>
-                      ))
-                    ) : (
-                      <div className="px-3 py-1.5 text-sm text-muted-foreground">No products added now</div>
-                    )}
-                  </div>
-                </AccordionContent>
-              </AccordionItem>
-
               <AccordionItem value="men" className="border-neutral-200">
                 <AccordionTrigger className="px-3">Men</AccordionTrigger>
                 <AccordionContent>
                   <div className="space-y-1">
                     {organizedCategories.men.subcategories.length > 0 ? (
                       organizedCategories.men.subcategories.slice(0, 12).map((item) => (
-                        <a key={item.name} href={item.href} className="block rounded-md px-3 py-1.5 text-sm text-muted-foreground hover:bg-accent hover:text-accent-foreground">
-                          {item.name}
-                        </a>
-                      ))
-                    ) : (
-                      <div className="px-3 py-1.5 text-sm text-muted-foreground">No products added now</div>
-                    )}
-                  </div>
-                </AccordionContent>
-              </AccordionItem>
-
-              <AccordionItem value="women" className="border-neutral-200">
-                <AccordionTrigger className="px-3">Women</AccordionTrigger>
-                <AccordionContent>
-                  <div className="space-y-1">
-                    {organizedCategories.women.subcategories.length > 0 ? (
-                      organizedCategories.women.subcategories.slice(0, 12).map((item) => (
                         <a key={item.name} href={item.href} className="block rounded-md px-3 py-1.5 text-sm text-muted-foreground hover:bg-accent hover:text-accent-foreground">
                           {item.name}
                         </a>

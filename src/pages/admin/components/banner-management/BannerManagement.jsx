@@ -12,7 +12,9 @@ import {
   RefreshCw,
   AlertCircle,
   Tag,
-  X
+  X,
+  Link as LinkIcon,
+  Edit
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -49,6 +51,9 @@ const BannerManagement = () => {
   const [saleFilter, setSaleFilter] = useState('all')
   const [dragIndex, setDragIndex] = useState(null)
   const [operationLoading, setOperationLoading] = useState({})
+  const [bannerLink, setBannerLink] = useState('')
+  const [editingLink, setEditingLink] = useState(null)
+  const [linkInput, setLinkInput] = useState('')
   const fileInputRef = useRef(null)
 
   // Fetch banners
@@ -94,6 +99,9 @@ const BannerManagement = () => {
     try {
       const formData = new FormData()
       formData.append('banner', file)
+      if (bannerLink) {
+        formData.append('link', bannerLink)
+      }
 
       const response = await adminApi.banners.uploadBanner(formData)
       
@@ -103,6 +111,7 @@ const BannerManagement = () => {
       }
       
       toast.success('Banner uploaded successfully')
+      setBannerLink('') // Reset link input
       
       // Refresh to ensure consistency
       await fetchBanners()
@@ -111,6 +120,29 @@ const BannerManagement = () => {
       console.error('Error uploading banner:', error)
     } finally {
       setUploading(false)
+    }
+  }
+
+  // Update banner link
+  const updateBannerLink = async (bannerId, link) => {
+    setOperationLoading(prev => ({ ...prev, [bannerId]: true }))
+    try {
+      await adminApi.banners.updateBannerLink(bannerId, link)
+      setBanners(prevBanners => 
+        prevBanners.map(banner => 
+          banner._id === bannerId 
+            ? { ...banner, link: link }
+            : banner
+        )
+      )
+      toast.success('Banner link updated successfully')
+      setEditingLink(null)
+      setLinkInput('')
+    } catch (error) {
+      toast.error('Failed to update banner link')
+      console.error('Error updating banner link:', error)
+    } finally {
+      setOperationLoading(prev => ({ ...prev, [bannerId]: false }))
     }
   }
 
@@ -313,19 +345,46 @@ const BannerManagement = () => {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div
-            className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-gray-400 transition-colors cursor-pointer"
-            onDrop={handleDropZone}
-            onDragOver={handleDragOverZone}
-            onClick={() => fileInputRef.current?.click()}
-          >
-            <Image className="h-12 w-12 mx-auto text-gray-400 mb-4" />
-            <p className="text-lg font-medium text-gray-600 mb-2">
-              Drop your image here
-            </p>
-            <p className="text-sm text-gray-500">
-              PNG, JPG, GIF up to 5MB
-            </p>
+          <div className="space-y-4">
+            <div
+              className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-gray-400 transition-colors cursor-pointer"
+              onDrop={handleDropZone}
+              onDragOver={handleDragOverZone}
+              onClick={() => fileInputRef.current?.click()}
+            >
+              <Image className="h-12 w-12 mx-auto text-gray-400 mb-4" />
+              <p className="text-lg font-medium text-gray-600 mb-2">
+                Drop your image here
+              </p>
+              <p className="text-sm text-gray-500">
+                PNG, JPG, GIF up to 5MB
+              </p>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="banner-link">Banner Link (Optional)</Label>
+              <div className="flex gap-2">
+                <Input
+                  id="banner-link"
+                  type="url"
+                  placeholder="https://example.com or /products"
+                  value={bannerLink}
+                  onChange={(e) => setBannerLink(e.target.value)}
+                  className="flex-1"
+                />
+                {bannerLink && (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => setBannerLink('')}
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                )}
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Add a URL to redirect users when they click on this banner. Leave empty if no link needed.
+              </p>
+            </div>
           </div>
         </CardContent>
       </Card>
@@ -416,11 +475,16 @@ const BannerManagement = () => {
           onToggleStatus={toggleBannerStatus}
           onToggleSaleStatus={toggleBannerSaleStatus}
           onDelete={deleteBanner}
+          onUpdateLink={updateBannerLink}
           onDragStart={handleDragStart}
           onDragOver={handleDragOver}
           onDrop={handleDrop}
           dragIndex={dragIndex}
           operationLoading={operationLoading}
+          editingLink={editingLink}
+          setEditingLink={setEditingLink}
+          linkInput={linkInput}
+          setLinkInput={setLinkInput}
         />
       </div>
     </div>
@@ -432,12 +496,17 @@ const BannerGrid = ({
   banners, 
   onToggleStatus, 
   onToggleSaleStatus,
-  onDelete, 
+  onDelete,
+  onUpdateLink,
   onDragStart, 
   onDragOver, 
   onDrop, 
   dragIndex,
-  operationLoading 
+  operationLoading,
+  editingLink,
+  setEditingLink,
+  linkInput,
+  setLinkInput
 }) => {
   if (banners.length === 0) {
     return (
@@ -496,7 +565,61 @@ const BannerGrid = ({
                   <div className="text-xs text-gray-500">
                     {banner.isActive ? '✅ Visible on website' : '❌ Hidden from website'}
                   </div>
-                  <div className="flex items-center justify-end">
+                  {banner.link && (
+                    <div className="flex items-center gap-1 text-xs text-blue-600">
+                      <LinkIcon className="h-3 w-3" />
+                      <a href={banner.link} target="_blank" rel="noopener noreferrer" className="truncate hover:underline">
+                        {banner.link}
+                      </a>
+                    </div>
+                  )}
+                  {editingLink === banner._id ? (
+                    <div className="space-y-2">
+                      <Input
+                        type="url"
+                        placeholder="https://example.com or /products"
+                        value={linkInput}
+                        onChange={(e) => setLinkInput(e.target.value)}
+                        className="text-xs"
+                      />
+                      <div className="flex gap-2">
+                        <Button
+                          size="sm"
+                          variant="default"
+                          onClick={() => onUpdateLink(banner._id, linkInput)}
+                          disabled={operationLoading[banner._id]}
+                          className="flex-1 text-xs"
+                        >
+                          Save
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => {
+                            setEditingLink(null)
+                            setLinkInput('')
+                          }}
+                          className="flex-1 text-xs"
+                        >
+                          Cancel
+                        </Button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="flex items-center justify-between">
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => {
+                          setEditingLink(banner._id)
+                          setLinkInput(banner.link || '')
+                        }}
+                        className="text-xs gap-1"
+                      >
+                        <LinkIcon className="h-3 w-3" />
+                        {banner.link ? 'Edit Link' : 'Add Link'}
+                      </Button>
+                      <div className="flex items-center justify-end">
                     <div className="flex gap-2">
                     <div className="flex flex-col items-center gap-1">
                       <Button
@@ -573,6 +696,8 @@ const BannerGrid = ({
                     </AlertDialog>
                     </div>
                   </div>
+                    </div>
+                  )}
                 </div>
               </CardContent>
             </Card>

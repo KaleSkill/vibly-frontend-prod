@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { adminApi } from '@/api/api';
 import { toast } from 'sonner';
 import { Package, CreditCard, MapPin, Calendar, User, Phone, Mail, Settings } from 'lucide-react';
+import { getStatusColor } from '@/utils/orderStatus';
 
 export const OrderDetailsModal = ({ order, onClose, onUpdateStatus }) => {
   const [orderDetails, setOrderDetails] = useState(null);
@@ -21,7 +22,7 @@ export const OrderDetailsModal = ({ order, onClose, onUpdateStatus }) => {
     try {
       setLoading(true);
       const response = await adminApi.newOrders.getOrderItemsByOrderId(order.orderId);
-      
+
       if (response.data.success) {
         setOrderDetails(response.data.data);
       }
@@ -34,16 +35,7 @@ export const OrderDetailsModal = ({ order, onClose, onUpdateStatus }) => {
   };
 
   const getStatusBadgeColor = (status) => {
-    const colors = {
-      'Ordered': 'bg-blue-100 text-blue-800',
-      'Shipped': 'bg-yellow-100 text-yellow-800',
-      'Delivered': 'bg-green-100 text-green-800',
-      'Cancelled': 'bg-red-100 text-red-800',
-      'Return Requested': 'bg-orange-100 text-orange-800',
-      'Returned': 'bg-purple-100 text-purple-800',
-      'Refunded': 'bg-gray-100 text-gray-800'
-    };
-    return colors[status] || 'bg-gray-100 text-gray-800';
+    return getStatusColor(status);
   };
 
   const getPaymentStatusBadgeColor = (status) => {
@@ -182,7 +174,7 @@ export const OrderDetailsModal = ({ order, onClose, onUpdateStatus }) => {
               <CardContent>
                 <div className="space-y-4">
                   {orderDetails?.products?.map((product, index) => (
-                    
+
                     <div key={index} className="border rounded-lg p-4">
                       <div className="flex items-start gap-4">
                         <img
@@ -203,9 +195,9 @@ export const OrderDetailsModal = ({ order, onClose, onUpdateStatus }) => {
                           </p>
                         </div>
                         <div className="text-right">
-                          <Badge className={getStatusBadgeColor(product.itemsGroupedByStatus ? 
+                          <Badge className={getStatusBadgeColor(product.itemsGroupedByStatus ?
                             Object.keys(product.itemsGroupedByStatus)[0] : 'Ordered')}>
-                            {product.itemsGroupedByStatus ? 
+                            {product.itemsGroupedByStatus ?
                               Object.keys(product.itemsGroupedByStatus)[0] : 'Ordered'}
                           </Badge>
                         </div>
@@ -280,8 +272,8 @@ export const OrderDetailsModal = ({ order, onClose, onUpdateStatus }) => {
           </div>
           <div className="flex gap-2">
             {onUpdateStatus && (
-              <Button 
-                variant="default" 
+              <Button
+                variant="default"
                 onClick={() => {
                   onClose();
                   onUpdateStatus(order);

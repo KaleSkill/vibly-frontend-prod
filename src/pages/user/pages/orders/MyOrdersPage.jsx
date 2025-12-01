@@ -2,9 +2,8 @@ import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { userApi } from '@/api/api'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Separator } from '@/components/ui/separator'
 import { toast } from 'sonner'
 import { 
   Package, 
@@ -16,9 +15,9 @@ import {
   Clock,
   XCircle,
   Receipt,
-  MapPin,
   Hash
 } from 'lucide-react'
+import { getStatusColor } from '@/utils/orderStatus'
 
 const MyOrdersPage = () => {
   const navigate = useNavigate()
@@ -45,34 +44,9 @@ const MyOrdersPage = () => {
     }
   }
 
-  const getStatusIcon = (status) => {
-    switch (status) {
-      case 'DELIVERED':
-        return <CheckCircle className="h-4 w-4 text-green-600" />
-      case 'SHIPPED':
-        return <Truck className="h-4 w-4 text-blue-600" />
-      case 'PROCESSING':
-        return <Clock className="h-4 w-4 text-yellow-600" />
-      case 'CANCELLED':
-        return <XCircle className="h-4 w-4 text-red-600" />
-      default:
-        return <Package className="h-4 w-4 text-muted-foreground" />
-    }
-  }
-
+  // Use utility functions for status display
   const getStatusBadgeColor = (status) => {
-    switch (status) {
-      case 'DELIVERED':
-        return 'bg-green-100 text-green-800 border-green-200'
-      case 'SHIPPED':
-        return 'bg-blue-100 text-blue-800 border-blue-200'
-      case 'PROCESSING':
-        return 'bg-yellow-100 text-yellow-800 border-yellow-200'
-      case 'CANCELLED':
-        return 'bg-red-100 text-red-800 border-red-200'
-      default:
-        return 'bg-gray-100 text-gray-800 border-gray-200'
-    }
+    return getStatusColor(status)
   }
 
   const getPaymentStatusBadgeColor = (status) => {
@@ -202,8 +176,7 @@ const MyOrdersPage = () => {
                       </div>
                     </div>
                     <Badge className={`${getStatusBadgeColor(order.overallStatus)} rounded-full`}>
-                      {getStatusIcon(order.overallStatus)}
-                      <span className="ml-1 text-xs">{order.overallStatus}</span>
+                      <span className="text-xs">{order.overallStatus}</span>
                     </Badge>
                   </div>
 
@@ -213,23 +186,28 @@ const MyOrdersPage = () => {
                       {order.totalItems} {order.totalItems === 1 ? 'item' : 'items'}
                     </div>
                     <div className="flex gap-2 overflow-x-auto pb-2">
-                      {order.items && order.items.slice(0, 4).map((item, index) => (
-                        <div key={index} className="flex-shrink-0">
-                          <div className="w-12 h-12 bg-muted rounded-lg overflow-hidden">
-                            <img
-                              src={getImageUrl(item.product?.image)}
-                              alt={item.product?.name || 'Product'}
-                              className="w-full h-full object-cover"
-                              onError={(e) => {
-                                e.target.src = '/placeholder-product.jpg';
-                              }}
-                            />
+                      {order.items && order.items.slice(0, 4).map((item, index) => {
+                        const itemStatus = item.orderStatus || item.status;
+                        return (
+                        <div key={index} className="flex-shrink-0 w-16">
+                          <div className="relative">
+                            <div className="w-12 h-12 bg-muted rounded-lg overflow-hidden mx-auto">
+                              <img
+                                src={getImageUrl(item.product?.image)}
+                                alt={item.product?.name || 'Product'}
+                                className="w-full h-full object-cover"
+                                onError={(e) => {
+                                  e.target.src = '/placeholder-product.jpg';
+                                }}
+                              />
+                            </div>
                           </div>
-                          <div className="text-xs text-center mt-1 text-muted-foreground">
-                            Qty: {item.quantity}
+                            <div className="text-xs text-center mt-1 text-muted-foreground">
+                              Qty: {item.quantity}
+                            </div>
                           </div>
-                        </div>
-                      ))}
+                        );
+                      })}
                       {order.items && order.items.length > 4 && (
                         <div className="flex-shrink-0 flex items-center justify-center">
                           <div className="w-12 h-12 bg-muted rounded-lg flex items-center justify-center">
@@ -297,8 +275,7 @@ const MyOrdersPage = () => {
                         </div>
                       </div>
                       <Badge className={`${getStatusBadgeColor(order.overallStatus)} rounded-full`}>
-                        {getStatusIcon(order.overallStatus)}
-                        <span className="ml-1">{order.overallStatus}</span>
+                        <span>{order.overallStatus}</span>
                       </Badge>
                     </div>
                     
@@ -309,23 +286,28 @@ const MyOrdersPage = () => {
                         <div className="text-sm font-medium mb-2">
                           {order.totalItems} {order.totalItems === 1 ? 'item' : 'items'}
                         </div>
-                        <div className="space-y-1">
-                          {order.items && order.items.slice(0, 3).map((item, index) => (
-                            <div key={index} className="text-xs text-muted-foreground flex items-center gap-2">
-                              <div className="w-4 h-4 bg-muted rounded overflow-hidden flex-shrink-0">
-                                <img
-                                  src={getImageUrl(item.product?.image)}
-                                  alt={item.product?.name || 'Product'}
-                                  className="w-full h-full object-cover"
-                                  onError={(e) => {
-                                    e.target.src = '/placeholder-product.jpg';
-                                  }}
-                                />
+                        <div className="space-y-2">
+                          {order.items && order.items.slice(0, 3).map((item, index) => {
+                            const itemStatus = item.orderStatus || item.status;
+                            return (
+                              <div key={index} className="flex items-center justify-between gap-2">
+                                <div className="text-xs text-muted-foreground flex items-center gap-2 flex-1 min-w-0">
+                                  <div className="w-4 h-4 bg-muted rounded overflow-hidden flex-shrink-0">
+                                    <img
+                                      src={getImageUrl(item.product?.image)}
+                                      alt={item.product?.name || 'Product'}
+                                      className="w-full h-full object-cover"
+                                      onError={(e) => {
+                                        e.target.src = '/placeholder-product.jpg';
+                                      }}
+                                    />
+                                  </div>
+                                  <span className="truncate">{item.product?.name}</span>
+                                  <span className="text-primary font-medium">×{item.quantity}</span>
+                                </div>
                               </div>
-                              <span className="truncate">{item.product?.name}</span>
-                              <span className="text-primary font-medium">×{item.quantity}</span>
-                            </div>
-                          ))}
+                            );
+                          })}
                           {order.items && order.items.length > 3 && (
                             <div className="text-xs text-muted-foreground">
                               +{order.items.length - 3} more items

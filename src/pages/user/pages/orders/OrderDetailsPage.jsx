@@ -24,7 +24,8 @@ import {
   ShoppingBag,
   X,
   RotateCcw,
-  AlertCircle
+  AlertCircle,
+  ArrowLeft
 } from 'lucide-react'
 import RefundRequestForm from '@/components/ui/RefundRequestForm'
 import {
@@ -33,6 +34,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
+import { getStatusColor, getStatusIcon } from '@/utils/orderStatus'
 
 const OrderDetailsPage = () => {
   const { orderId } = useParams()
@@ -66,12 +68,14 @@ const OrderDetailsPage = () => {
 
   // Helper functions
   const canCancelItem = (item) => {
-    return item.orderStatus === 'Ordered' && !item.cancelledAt
+    const itemStatus = item.orderStatus || item.status;
+    return itemStatus === 'Ordered' && !item.cancelledAt
   }
 
   const canRefundItem = (item) => {
-    return item.orderStatus === 'Cancelled' && 
-           order.paymentMethod === 'ONLINE' && 
+    const itemStatus = item.orderStatus || item.status;
+    return itemStatus === 'Cancelled' && 
+           order?.paymentMethod === 'ONLINE' && 
            !item.refundRequestedAt && 
            !item.refundAmount
   }
@@ -136,34 +140,9 @@ const OrderDetailsPage = () => {
     setSelectedItem(null)
   }
 
-  const getStatusIcon = (status) => {
-    switch (status) {
-      case 'DELIVERED':
-        return <CheckCircle className="h-4 w-4 text-green-600" />
-      case 'SHIPPED':
-        return <Truck className="h-4 w-4 text-blue-600" />
-      case 'PROCESSING':
-        return <Clock className="h-4 w-4 text-yellow-600" />
-      case 'CANCELLED':
-        return <XCircle className="h-4 w-4 text-red-600" />
-      default:
-        return <Package className="h-4 w-4 text-muted-foreground" />
-    }
-  }
-
+  // Use utility functions for status display
   const getStatusBadgeColor = (status) => {
-    switch (status) {
-      case 'DELIVERED':
-        return 'bg-green-100 text-green-800 border-green-200'
-      case 'SHIPPED':
-        return 'bg-blue-100 text-blue-800 border-blue-200'
-      case 'PROCESSING':
-        return 'bg-yellow-100 text-yellow-800 border-yellow-200'
-      case 'CANCELLED':
-        return 'bg-red-100 text-red-800 border-red-200'
-      default:
-        return 'bg-gray-100 text-gray-800 border-gray-200'
-    }
+    return getStatusColor(status)
   }
 
   const getPaymentStatusBadgeColor = (status) => {
@@ -257,10 +236,7 @@ const OrderDetailsPage = () => {
             <h1 className="text-2xl md:text-3xl font-bold">Order Details</h1>
             <p className="text-sm text-muted-foreground">Track your order status</p>
           </div>
-          <Badge className={`${getStatusBadgeColor(order.overallStatus)} hidden sm:flex rounded-full`}>
-            {getStatusIcon(order.overallStatus)}
-            <span className="ml-1">{order.overallStatus}</span>
-          </Badge>
+         
         </div>
 
         {/* Order Status Banner - Mobile */}
@@ -361,8 +337,19 @@ const OrderDetailsPage = () => {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {order.items && order.items.map((item, index) => (
-                    <div key={index} className="border border-border/50 rounded-lg p-4 hover:border-border transition-colors duration-200">
+                  {order.items && order.items.map((item, index) => {
+                    const itemStatus = item.orderStatus || item.status;
+                    return (
+                      <div key={index} className="relative border border-border/50 rounded-lg p-4 hover:border-border transition-colors duration-200">
+                      {/* Item Status Badge - Right end of container */}
+                      {itemStatus && (
+                        <Badge 
+                          className={`${getStatusColor(itemStatus)} absolute top-2 right-2 text-xs px-2.5 py-1 font-medium z-10 whitespace-nowrap`}
+                          title={itemStatus}
+                        >
+                          {itemStatus}
+                        </Badge>
+                      )}
                       {/* Mobile Layout */}
                       <div className="md:hidden space-y-3">
                         <div className="flex gap-3">
@@ -377,9 +364,13 @@ const OrderDetailsPage = () => {
                             />
                           </div>
                           <div className="flex-1 min-w-0">
-                            <h4 className="font-medium text-sm line-clamp-2">{item.product?.name || 'Product'}</h4>
-                            <div className="text-xs text-muted-foreground mt-1">
-                              Color: {item.color?.name || 'N/A'} • Size: {item.size || 'N/A'}
+                            <div className="flex items-start justify-between gap-2">
+                              <div className="flex-1 min-w-0">
+                                <h4 className="font-medium text-sm line-clamp-2">{item.product?.name || 'Product'}</h4>
+                                <div className="text-xs text-muted-foreground mt-1">
+                                  Color: {item.color?.name || 'N/A'} • Size: {item.size || 'N/A'}
+                                </div>
+                              </div>
                             </div>
                           </div>
                         </div>
@@ -458,7 +449,7 @@ const OrderDetailsPage = () => {
                             )}
                             
                             {/* Cancelled Status */}
-                            {item.orderStatus === 'Cancelled' && !canRefundItem(item) && !getRefundStatus(item) && (
+                            {itemStatus === 'Cancelled' && !canRefundItem(item) && !getRefundStatus(item) && (
                               <div className="flex items-center gap-2 px-2 py-1 bg-red-50 text-red-700 rounded-md text-xs">
                                 <XCircle className="h-3 w-3" />
                                 <span>Cancelled</span>
@@ -481,7 +472,9 @@ const OrderDetailsPage = () => {
                           />
                         </div>
                         <div className="flex-1 min-w-0">
-                          <h4 className="font-medium text-lg mb-2">{item.product?.name || 'Product'}</h4>
+                          <div className="flex items-start justify-between gap-2 mb-2">
+                            <h4 className="font-medium text-lg">{item.product?.name || 'Product'}</h4>
+                          </div>
                           <div className="text-sm text-muted-foreground mb-3">
                             Color: {item.color?.name || 'N/A'} • Size: {item.size || 'N/A'}
                           </div>
@@ -501,79 +494,80 @@ const OrderDetailsPage = () => {
                               <div className="text-xl font-bold text-primary">₹{formatPrice(item.amount * item.quantity)}</div>
                             </div>
                           </div>
-                        </div>
-                        
-                        {/* Item Actions */}
-                        <div className="mt-4 pt-3 border-t border-border/50">
-                          <div className="flex gap-2 flex-wrap">
-                            {/* Cancel Button */}
-                            {canCancelItem(item) && (
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => handleCancelClick(item)}
-                                disabled={cancelLoading === item._id}
-                                className="text-red-600 border-red-600 hover:bg-red-50 hover:text-red-700 rounded-full"
-                              >
-                                {cancelLoading === item._id ? (
-                                  <>
-                                    <Clock className="h-4 w-4 mr-1" />
-                                    Cancelling...
-                                  </>
-                                ) : (
-                                  <>
-                                    <X className="h-4 w-4 mr-1" />
-                                    Cancel Item
-                                  </>
-                                )}
-                              </Button>
-                            )}
-                            
-                            {/* Refund Request Button */}
-                            {canRefundItem(item) && (
-                              <Button
-                                variant="default"
-                                size="sm"
-                                onClick={() => handleRefundRequest(item)}
-                                className="bg-blue-600 hover:bg-blue-700 rounded-full"
-                              >
-                                <RotateCcw className="h-4 w-4 mr-1" />
-                                Request Refund
-                              </Button>
-                            )}
-                            
-                            {/* Refund Status */}
-                            {getRefundStatus(item) === 'pending' && (
-                              <div className="flex items-center gap-2 px-3 py-2 bg-blue-50 text-blue-700 rounded-md text-sm">
-                                <AlertCircle className="h-4 w-4" />
-                                <span>Refund Requested - Under Review</span>
-                              </div>
-                            )}
-                            {getRefundStatus(item) === 'refunded' && (
-                              <div className="flex items-center gap-2 px-3 py-2 bg-green-50 text-green-700 rounded-md text-sm">
-                                <CheckCircle className="h-4 w-4" />
-                                <span>Refund Processed</span>
-                              </div>
-                            )}
-                            {getRefundStatus(item) === 'rejected' && (
-                              <div className="flex items-center gap-2 px-3 py-2 bg-red-50 text-red-700 rounded-md text-sm">
-                                <XCircle className="h-4 w-4" />
-                                <span>Refund Rejected</span>
-                              </div>
-                            )}
-                            
-                            {/* Cancelled Status */}
-                            {item.orderStatus === 'Cancelled' && !canRefundItem(item) && !getRefundStatus(item) && (
-                              <div className="flex items-center gap-2 px-3 py-2 bg-red-50 text-red-700 rounded-md text-sm">
-                                <XCircle className="h-4 w-4" />
-                                <span>Cancelled</span>
-                              </div>
-                            )}
+                          
+                          {/* Item Actions */}
+                          <div className="mt-4 pt-3 border-t border-border/50">
+                            <div className="flex gap-2 flex-wrap">
+                              {/* Cancel Button */}
+                              {canCancelItem(item) && (
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => handleCancelClick(item)}
+                                  disabled={cancelLoading === item._id}
+                                  className="text-red-600 border-red-600 hover:bg-red-50 hover:text-red-700 rounded-full"
+                                >
+                                  {cancelLoading === item._id ? (
+                                    <>
+                                      <Clock className="h-4 w-4 mr-1" />
+                                      Cancelling...
+                                    </>
+                                  ) : (
+                                    <>
+                                      <X className="h-4 w-4 mr-1" />
+                                      Cancel Item
+                                    </>
+                                  )}
+                                </Button>
+                              )}
+                              
+                              {/* Refund Request Button */}
+                              {canRefundItem(item) && (
+                                <Button
+                                  variant="default"
+                                  size="sm"
+                                  onClick={() => handleRefundRequest(item)}
+                                  className="bg-blue-600 hover:bg-blue-700 rounded-full"
+                                >
+                                  <RotateCcw className="h-4 w-4 mr-1" />
+                                  Request Refund
+                                </Button>
+                              )}
+                              
+                              {/* Refund Status */}
+                              {getRefundStatus(item) === 'pending' && (
+                                <div className="flex items-center gap-2 px-3 py-2 bg-blue-50 text-blue-700 rounded-md text-sm">
+                                  <AlertCircle className="h-4 w-4" />
+                                  <span>Refund Requested - Under Review</span>
+                                </div>
+                              )}
+                              {getRefundStatus(item) === 'refunded' && (
+                                <div className="flex items-center gap-2 px-3 py-2 bg-green-50 text-green-700 rounded-md text-sm">
+                                  <CheckCircle className="h-4 w-4" />
+                                  <span>Refund Processed</span>
+                                </div>
+                              )}
+                              {getRefundStatus(item) === 'rejected' && (
+                                <div className="flex items-center gap-2 px-3 py-2 bg-red-50 text-red-700 rounded-md text-sm">
+                                  <XCircle className="h-4 w-4" />
+                                  <span>Refund Rejected</span>
+                                </div>
+                              )}
+                              
+                              {/* Cancelled Status */}
+                              {itemStatus === 'Cancelled' && !canRefundItem(item) && !getRefundStatus(item) && (
+                                <div className="flex items-center gap-2 px-3 py-2 bg-red-50 text-red-700 rounded-md text-sm">
+                                  <XCircle className="h-4 w-4" />
+                                  <span>Cancelled</span>
+                                </div>
+                              )}
+                            </div>
                           </div>
                         </div>
                       </div>
                     </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </CardContent>
             </Card>

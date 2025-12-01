@@ -93,28 +93,46 @@ const ModernHomePage = () => {
       {/* Banner Carousel */}
       <section className="relative overflow-hidden">
         {loading ? (
-        <div className="h-48 sm:h-64 md:h-80 lg:h-96 bg-muted flex items-center justify-center">
+        <div className="h-36 sm:h-64 md:h-80 lg:h-96 bg-muted flex items-center justify-center">
           <div className="w-full h-full flex items-center justify-center">
           </div>
         </div>
         ) : banners.length > 0 ? (
-          <div className="relative h-48 sm:h-64 md:h-80 lg:h-96">
-            {banners.map((banner, index) => (
-              <motion.div
-                key={banner._id}
-                className="absolute inset-0 w-full h-full"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: index === currentBannerIndex ? 1 : 0 }}
-                transition={{ duration: 0.5 }}
-              >
-                <img
-                  src={banner.image.url || banner.image.secure_url}
-                  alt={`Banner ${index + 1}`}
-                  className="w-full h-full object-cover"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
-              </motion.div>
-            ))}
+          <div className="relative h-36 sm:h-64 md:h-80 lg:h-96">
+            {banners.map((banner, index) => {
+              const isActive = index === currentBannerIndex;
+              return (
+                <motion.div
+                  key={banner._id}
+                  className={`absolute inset-0 w-full h-full ${isActive ? 'pointer-events-auto' : 'pointer-events-none'}`}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: isActive ? 1 : 0 }}
+                  transition={{ duration: 0.5 }}
+                >
+                  {banner.link ? (
+                    <a 
+                      href={banner.link} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="block w-full h-full cursor-pointer"
+                    >
+                      <img
+                        src={banner.image.url || banner.image.secure_url}
+                        alt={`Banner ${index + 1}`}
+                        className="w-full h-full object-cover"
+                      />
+                    </a>
+                  ) : (
+                    <img
+                      src={banner.image.url || banner.image.secure_url}
+                      alt={`Banner ${index + 1}`}
+                      className="w-full h-full object-cover"
+                    />
+                  )}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent pointer-events-none" />
+                </motion.div>
+              );
+            })}
 
             {banners.length > 1 && (
               <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex gap-2">
@@ -131,7 +149,7 @@ const ModernHomePage = () => {
             )}
           </div>
         ) : (
-          <div className="h-48 sm:h-64 md:h-80 lg:h-96 bg-muted flex items-center justify-center">
+          <div className="h-36 sm:h-64 md:h-80 lg:h-96 bg-muted flex items-center justify-center">
             <p className="text-muted-foreground">No banners available</p>
           </div>
         )}

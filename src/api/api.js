@@ -170,6 +170,11 @@ export const adminApi = {
             return api.put('/admin/banners/reorder/all', { orderedIds });
         },
 
+        // Update banner link
+        updateBannerLink: (bannerId, link) => {
+            return api.patch(`/admin/banners/${bannerId}/link`, { link });
+        },
+
         // Delete banner
         deleteBanner: (bannerId) => {
             return api.delete(`/admin/banners/${bannerId}`);

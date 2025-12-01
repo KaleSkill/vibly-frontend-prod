@@ -9,22 +9,20 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { adminApi, authApi } from '@/api/api';
 import { toast } from 'sonner';
-import { 
-  Search, 
-  Eye, 
-  Filter, 
-  RefreshCw, 
-  Package, 
-  CreditCard, 
-  Truck, 
-  MoreHorizontal, 
+import {
+  Search,
+  Eye,
+  Filter,
+  RefreshCw,
+  Package,
+  CreditCard,
+  Truck,
+  MoreHorizontal,
   Settings,
-  ShoppingCart,
-  Clock,
-  Users,
-  Download
+  ShoppingCart
 } from 'lucide-react';
 import { StatusUpdateModal } from './StatusUpdateModal';
+import { getStatusColor } from '@/utils/orderStatus';
 
 export const OrderManagement = () => {
   const navigate = useNavigate();
@@ -37,7 +35,7 @@ export const OrderManagement = () => {
   const [showStatusModal, setShowStatusModal] = useState(false);
   const [userDetails, setUserDetails] = useState({});
   const [loadingUserDetails, setLoadingUserDetails] = useState(false);
-  
+
   // Filters
   const [filters, setFilters] = useState({
     status: '',
@@ -57,7 +55,7 @@ export const OrderManagement = () => {
 
       const response = await adminApi.newOrders.getAllOrders(params.toString());
       console.log("order seeeee", response.data.data)
-      
+
       if (response.data.success) {
         setOrders(response.data.data);
         setTotalPages(response.data.totalPages);
@@ -82,7 +80,7 @@ export const OrderManagement = () => {
       return null;
     }
   }
-   
+
 
   useEffect(() => {
     fetchOrders();
@@ -131,16 +129,8 @@ export const OrderManagement = () => {
   };
 
   const getStatusBadgeColor = (status) => {
-    const colors = {
-      'Ordered': 'bg-blue-100 text-blue-800',
-      'Shipped': 'bg-yellow-100 text-yellow-800',
-      'Delivered': 'bg-green-100 text-green-800',
-      'Cancelled': 'bg-red-100 text-red-800',
-      'Return Requested': 'bg-orange-100 text-orange-800',
-      'Returned': 'bg-purple-100 text-purple-800',
-      'Refunded': 'bg-gray-100 text-gray-800'
-    };
-    return colors[status] || 'bg-gray-100 text-gray-800';
+    return getStatusColor(status);
+    
   };
 
   const getPaymentStatusBadgeColor = (status) => {
@@ -244,7 +234,7 @@ export const OrderManagement = () => {
                 />
               </div>
             </div>
-            
+
             <div className="space-y-2">
               <label className="text-sm font-medium">Order Status</label>
               <Select value={filters.status || "all"} onValueChange={(value) => handleStatusFilter(value === "all" ? "" : value)}>
@@ -263,7 +253,7 @@ export const OrderManagement = () => {
                 </SelectContent>
               </Select>
             </div>
-            
+
             <div className="space-y-2">
               <label className="text-sm font-medium">Payment Status</label>
               <Select value={filters.paymentStatus || "all"} onValueChange={(value) => handlePaymentStatusFilter(value === "all" ? "" : value)}>
@@ -320,7 +310,7 @@ export const OrderManagement = () => {
                           <p className="font-medium">
                             {loadingUserDetails ? (
                               <span className="text-muted-foreground">Loading...</span>
-                            ) : userDetails[order.user?._id]?.firstname 
+                            ) : userDetails[order.user?._id]?.firstname
                               ? `${userDetails[order.user._id].firstname}`
                               : userDetails[order.user?._id]?.firstname || 'Unknown Customer'
                             }
@@ -360,9 +350,9 @@ export const OrderManagement = () => {
                           ))}
                           {order.items && order.items.length > 2 && (
                             <div className="text-center">
-                              <Button 
-                                variant="ghost" 
-                                size="sm" 
+                              <Button
+                                variant="ghost"
+                                size="sm"
                                 className="text-xs h-6"
                                 onClick={() => handleViewOrder(order)}
                               >
@@ -418,7 +408,7 @@ export const OrderManagement = () => {
                               <MoreHorizontal className="h-4 w-4" />
                             </Button>
                           </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
+                          <DropdownMenuContent align="end">
                             <DropdownMenuItem onClick={() => handleViewOrder(order)}>
                               <Eye className="h-4 w-4 mr-2" />
                               View Details
