@@ -1,6 +1,6 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Outlet, useNavigate, useLocation } from 'react-router-dom'
+import { Outlet, useNavigate, useLocation, Navigate } from 'react-router-dom'
 import { useAuthStore } from '@/store/authstore'
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
@@ -35,12 +35,58 @@ import {
 } from '@/components/ui/dropdown-menu'
 
 const AdminLayout = () => {
-  const { authUser, logout } = useAuthStore()
+  const { authUser, logout, isLoading } = useAuthStore()
   const navigate = useNavigate()
   const location = useLocation()
   const [sidebarOpen, setSidebarOpen] = useState(false)
 
   const [shiprocketToken] = useState(localStorage.getItem('shiprocket_token') || '')
+
+  // Protect admin routes - redirect if not authenticated or not admin
+  useEffect(() => {
+    if (!isLoading) {
+      if (!authUser) {
+        // User not logged in, redirect to home
+        navigate('/', { replace: true })
+      } else if (authUser.role !== 'Admin' && authUser.data?.role !== 'Admin') {
+        // User is not an admin, redirect to home
+        navigate('/', { replace: true })
+      }
+    }
+  }, [authUser, isLoading, navigate])
+
+  // Show loading while checking auth
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <svg
+          className="animate-spin h-8 w-8 text-primary"
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+        >
+          <circle
+            className="opacity-25"
+            cx="12"
+            cy="12"
+            r="10"
+            stroke="currentColor"
+            strokeWidth="4"
+          ></circle>
+          <path
+            className="opacity-75"
+            fill="currentColor"
+            d="M4 12a8 8 0 018-8v8H4z"
+          ></path>
+        </svg>
+      </div>
+    )
+  }
+
+  // Redirect if not authenticated or not admin
+  if (!authUser || (authUser.role !== 'Admin' && authUser.data?.role !== 'Admin')) {
+    return <Navigate to="/" replace />
+  }
 
   const navigation = [
     { name: 'Dashboard', href: '/admin', icon: Home, current: location.pathname === '/admin' },
