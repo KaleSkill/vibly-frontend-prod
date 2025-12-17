@@ -93,12 +93,12 @@ const ModernHomePage = () => {
       {/* Banner Carousel - Full Width */}
       <section className="relative w-full overflow-hidden bg-muted -mx-0">
         {loading ? (
-        <div className="h-48 sm:h-64 md:h-80 lg:h-[500px] bg-muted flex items-center justify-center">
+        <div className="h-36 sm:h-48 md:h-64 lg:h-[400px] bg-muted flex items-center justify-center">
           <div className="w-full h-full flex items-center justify-center">
           </div>
         </div>
         ) : banners.length > 0 ? (
-          <div className="relative w-full h-48 sm:h-64 md:h-80 lg:h-[500px]">
+          <div className="relative w-full h-36 sm:h-48 md:h-64 lg:h-[400px]">
             {banners.map((banner, index) => {
               const isActive = index === currentBannerIndex;
               return (
@@ -149,7 +149,7 @@ const ModernHomePage = () => {
             )}
           </div>
         ) : (
-          <div className="h-48 sm:h-64 md:h-80 lg:h-[500px] bg-muted flex items-center justify-center">
+          <div className="h-36 sm:h-48 md:h-64 lg:h-[400px] bg-muted flex items-center justify-center">
             <p className="text-muted-foreground">No banners available</p>
           </div>
         )}

@@ -8,7 +8,7 @@ const api = axios.create({
     withCredentials: true, // Include cookies in requests
 });
 
-// Request interceptor - attach Bearer token if present
+// Request interceptor - attach Bearer token if present  
 api.interceptors.request.use(config => {
     const token = localStorage.getItem('token');
     const shiprocketToken = localStorage.getItem('shiprocket_token');
@@ -109,8 +109,7 @@ export const authApi = {
             return response;
         } catch (error) {
             console.log('Backend logout failed, continuing with local cleanup:', error);
-            // Even if backend logout fails, we should still clear local storage
-            // This ensures the user can login again
+           
             throw error; // Re-throw so the caller knows it failed
         } finally {
             // Always clear local storage regardless of backend response
