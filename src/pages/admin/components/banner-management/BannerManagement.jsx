@@ -309,6 +309,9 @@ const BannerManagement = () => {
           <p className="text-muted-foreground">
             Upload and manage your website banners
           </p>
+          <p className="text-xs text-muted-foreground mt-1">
+            <strong>Note:</strong> Banner should be <strong>1920 x 500</strong> dimensions
+          </p>
         </div>
         <div className="flex items-center gap-2">
           <Button

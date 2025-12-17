@@ -41,9 +41,9 @@ const BannerCarousel = () => {
   }, [banners.length])
 
   return (
-    <section className="relative overflow-hidden bg-gray-50">
+    <section className="relative w-full overflow-hidden bg-gray-50 -mx-0">
       {loading ? (
-        <div className="h-64 md:h-80 lg:h-96 bg-gray-200 flex items-center justify-center">
+        <div className="h-48 sm:h-64 md:h-80 lg:h-[500px] bg-gray-200 flex items-center justify-center">
           <div className="w-full h-full flex flex-col gap-4 items-center justify-center px-4">
             <div className="w-2/3 md:w-1/2 h-10 md:h-16 bg-gray-300 rounded animate-pulse"></div>
             <div className="w-full h-32 md:h-48 bg-gray-300 rounded-lg animate-pulse"></div>
@@ -51,7 +51,7 @@ const BannerCarousel = () => {
           </div>
         </div>
       ) : banners.length > 0 ? (
-        <div className="relative h-64 md:h-80 lg:h-96">
+        <div className="relative w-full h-48 sm:h-64 md:h-80 lg:h-[500px]">
           {banners.map((banner, index) => (
             <div
               key={banner._id}
@@ -70,7 +70,7 @@ const BannerCarousel = () => {
           
           {/* Banner Indicators */}
           {banners.length > 1 && (
-            <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex gap-2">
+            <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex gap-2 z-10">
               {banners.map((_, index) => (
                 <button
                   key={index}
@@ -84,7 +84,7 @@ const BannerCarousel = () => {
           )}
         </div>
       ) : (
-        <div className="h-64 md:h-80 lg:h-96 bg-gray-100 flex items-center justify-center">
+        <div className="h-48 sm:h-64 md:h-80 lg:h-[500px] bg-gray-100 flex items-center justify-center">
           <p className="text-gray-500">No banners available</p>
         </div>
       )}
