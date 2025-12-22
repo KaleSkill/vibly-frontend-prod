@@ -94,18 +94,16 @@ export const useAuthStore = create(
             return;
           }
 
-          // Try to refresh token if needed
+          // Try to refresh token if needed (but don't fail completely if refresh fails)
           try {
             await get().refreshAccessToken();
           } catch (e) {
-            // If refresh fails, clear everything and set user as null
-            console.log('Token refresh failed, clearing auth state');
-            localStorage.clear();
-            set({ authUser: null, isLoading: false });
-            return;
+            // If refresh fails, log but continue with existing token
+            console.log('Token refresh failed, continuing with existing token:', e.message);
+            // Don't clear everything - token might still be valid
           }
 
-          // Check authentication with backend
+          // Check authentication with backend using current token
           const response = await authApi.checkAuth();
           if (response.data) {
             const user = response.data;
@@ -115,8 +113,14 @@ export const useAuthStore = create(
               isLoading: false
             });
           } else {
-            // No user data, clear everything
-            localStorage.clear();
+            // No user data, clear only auth items (preserve shiprocket_token)
+            const shiprocketToken = localStorage.getItem('shiprocket_token');
+            localStorage.removeItem('token');
+            localStorage.removeItem('refreshToken');
+            localStorage.removeItem('auth-storage');
+            if (shiprocketToken) {
+              localStorage.setItem('shiprocket_token', shiprocketToken);
+            }
             set({ authUser: null, isLoading: false });
           }
         } catch (error) {
@@ -142,8 +146,14 @@ export const useAuthStore = create(
             }
           }
           
-          // Clear everything on any auth failure
-          localStorage.clear();
+          // Clear only auth items on auth failure (preserve shiprocket_token)
+          const shiprocketToken = localStorage.getItem('shiprocket_token');
+          localStorage.removeItem('token');
+          localStorage.removeItem('refreshToken');
+          localStorage.removeItem('auth-storage');
+          if (shiprocketToken) {
+            localStorage.setItem('shiprocket_token', shiprocketToken);
+          }
           set({ authUser: null, isLoading: false });
         }
       },
@@ -186,10 +196,20 @@ export const useAuthStore = create(
           }
         } catch (error) {
           console.error('[authstore] Failed to refresh access token:', error?.response?.status, error?.response?.data || error?.message);
-          // Clear everything on refresh failure
-          localStorage.clear();
-          set({ authUser: null, isLoading: false });
+          // Only clear auth items if it's a definitive auth error (not network error, etc.)
+          // Preserve shiprocket_token
+          if (error.response?.status === 401 || error.response?.status === 403) {
+            const shiprocketToken = localStorage.getItem('shiprocket_token');
+            localStorage.removeItem('token');
+            localStorage.removeItem('refreshToken');
+            localStorage.removeItem('auth-storage');
+            if (shiprocketToken) {
+              localStorage.setItem('shiprocket_token', shiprocketToken);
+            }
+            set({ authUser: null, isLoading: false });
+          }
           // Don't show toast here as it might be called during normal logout
+          throw error; // Re-throw so caller knows it failed
         }
         return null;
       },

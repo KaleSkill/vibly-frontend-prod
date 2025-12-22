@@ -53,12 +53,26 @@ api.interceptors.response.use(
                     // Retry original request
                     return api(originalRequest);
                 } else {
-                    // Refresh failed, redirect to login
-                    localStorage.clear();
+                    // Refresh failed, redirect to login (but preserve shiprocket_token)
+                    const shiprocketToken = localStorage.getItem('shiprocket_token');
+                    localStorage.removeItem('token');
+                    localStorage.removeItem('refreshToken');
+                    localStorage.removeItem('auth-storage');
+                    if (shiprocketToken) {
+                        localStorage.setItem('shiprocket_token', shiprocketToken);
+                    }
                     window.location.href = '/login';
                 }
             } catch (refreshError) {
                 console.error('Token refresh failed:', refreshError);
+                // Preserve shiprocket_token on error
+                const shiprocketToken = localStorage.getItem('shiprocket_token');
+                localStorage.removeItem('token');
+                localStorage.removeItem('refreshToken');
+                localStorage.removeItem('auth-storage');
+                if (shiprocketToken) {
+                    localStorage.setItem('shiprocket_token', shiprocketToken);
+                }
             }
         } else if (error.response?.status === 401) {
         }

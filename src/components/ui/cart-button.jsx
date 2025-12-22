@@ -5,7 +5,7 @@ import { ShoppingBag, ArrowRight } from 'lucide-react'
 import { useCartStore } from '@/store/cartStore'
 import { CartSheet } from './cart-sheet-new'
 
-const CartButton = ({ product, colorId, size, quantity = 1, variant = "default", className = "" }) => {
+const CartButton = ({ product, colorId, size, quantity = 1, variant = "default", className = "", disabled = false }) => {
   const { 
     addToCart, 
     isProductInCart, 
@@ -57,10 +57,10 @@ const CartButton = ({ product, colorId, size, quantity = 1, variant = "default",
       onClick={handleAddToCart}
       variant={variant}
       className={`w-full rounded-full ${className}`}
-      disabled={isAdding || !colorId || !size}
+      disabled={isAdding || !colorId || !size || disabled}
     >
       <ShoppingBag className="w-4 h-4 mr-2" />
-      {isAdding ? 'Adding...' : 'Add to Cart'}
+      {disabled ? 'Out of Stock' : isAdding ? 'Adding...' : 'Add to Cart'}
     </Button>
   )
 }

@@ -269,9 +269,16 @@ const ProductDetailPage = () => {
                 />
                 
                 {/* Sale Badge */}
-                {product.isOnSale && (
+                {product.isOnSale && availableStock > 0 && (
                   <Badge className="absolute top-4 left-4 bg-red-500 text-white border-0">
                     Sale
+                  </Badge>
+                )}
+                
+                {/* Out of Stock Badge */}
+                {availableStock === 0 && (
+                  <Badge className="absolute top-4 left-4 bg-red-600 text-white border-0 font-semibold z-10">
+                    Out of Stock
                   </Badge>
                 )}
               </div>
@@ -391,27 +398,34 @@ const ProductDetailPage = () => {
                     size="icon"
                     variant="outline"
                     onClick={() => handleQuantityChange(-1)}
-                    disabled={quantity <= 1}
+                    disabled={quantity <= 1 || availableStock === 0}
                   >
                     <Minus className="h-4 w-4" />
                   </Button>
-                  <span className="w-12 text-center font-medium">{quantity}</span>
+                  <span className={`w-12 text-center font-medium ${availableStock === 0 ? 'text-muted-foreground' : ''}`}>
+                    {quantity}
+                  </span>
                   <Button
                     size="icon"
                     variant="outline"
                     onClick={() => handleQuantityChange(1)}
-                    disabled={quantity >= availableStock}
+                    disabled={quantity >= availableStock || availableStock === 0}
                   >
                     <Plus className="h-4 w-4" />
                   </Button>
                 </div>
               </div>
 
-              {availableStock < 10 && availableStock > 0 && (
-                <p className="text-sm text-destructive">
+              {/* Stock Status */}
+              {availableStock === 0 ? (
+                <p className="text-sm text-red-600 dark:text-red-400 font-medium">
+                  Out of Stock
+                </p>
+              ) : availableStock < 10 && availableStock > 0 ? (
+                <p className="text-sm text-destructive font-medium">
                   Only {availableStock} left in stock!
                 </p>
-              )}
+              ) : null}
 
               {/* Action Buttons */}
               <div className="space-y-3 pt-4">
@@ -421,7 +435,7 @@ const ProductDetailPage = () => {
                   size={selectedSize}
                   quantity={quantity}
                   className="w-full h-12 text-base"
-                  disabled={availableStock === 0}
+                  disabled={availableStock === 0 || !selectedColor || !selectedSize}
                 />
                 
               </div>
