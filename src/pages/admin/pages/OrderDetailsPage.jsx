@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { adminApi } from '@/api/api';
 import { toast } from 'sonner';
-import { Package, CreditCard, MapPin, Calendar, User, Phone, Mail, Settings, ArrowLeft } from 'lucide-react';
+import { Package, CreditCard, MapPin, Calendar, User, Phone, Mail, Settings, ArrowLeft, Tag, Receipt } from 'lucide-react';
 import { ShippingModal } from '../components/ShippingModal';
 
 export const OrderDetailsPage = () => {
@@ -291,6 +291,59 @@ export const OrderDetailsPage = () => {
                 )}
               </div>
             ))}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Order Summary with Coupon */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Receipt className="h-5 w-5" />
+            Order Summary
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-3">
+            {/* Subtotal */}
+            <div className="flex justify-between text-sm">
+              <span className="text-muted-foreground">Subtotal:</span>
+              <span>₹{orderDetails.amount?.subtotal ? orderDetails.amount.subtotal.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : 
+                orderDetails.products?.reduce((sum, p) => sum + (parseFloat(p.amount || 0) * p.quantity), 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) || '0.00'}</span>
+            </div>
+
+            {/* Coupon Discount */}
+            {orderDetails.coupon && orderDetails.coupon.code && orderDetails.amount?.couponDiscount > 0 && (
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground flex items-center gap-1">
+                  <Tag className="h-3 w-3" />
+                  Coupon ({orderDetails.coupon.code}):
+                </span>
+                <span className="text-green-600 font-medium">
+                  -₹{orderDetails.amount.couponDiscount.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                </span>
+              </div>
+            )}
+
+            {/* Shipping Charges */}
+            <div className="flex justify-between text-sm">
+              <span className="text-muted-foreground">Shipping:</span>
+              <span>
+                {orderDetails.amount?.shippingCharges === 0 ? (
+                  <span className="text-green-600">Free</span>
+                ) : (
+                  `₹${(orderDetails.amount?.shippingCharges || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+                )}
+              </span>
+            </div>
+
+            <div className="border-t pt-3">
+              <div className="flex justify-between text-lg font-bold">
+                <span>Total:</span>
+                <span>₹{orderDetails.amount?.totalAmount ? orderDetails.amount.totalAmount.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : 
+                  (orderDetails.products?.reduce((sum, p) => sum + (parseFloat(p.amount || 0) * p.quantity), 0) + (orderDetails.amount?.shippingCharges || 0)).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) || '0.00'}</span>
+              </div>
+            </div>
           </div>
         </CardContent>
       </Card>

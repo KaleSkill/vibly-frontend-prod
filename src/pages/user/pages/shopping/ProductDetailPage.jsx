@@ -22,6 +22,8 @@ import {
   Package,
   Clock,
   Award,
+  Tag,
+  Copy,
 } from 'lucide-react'
 import { userApi } from '@/api/api'
 import { toast } from 'sonner'
@@ -47,6 +49,9 @@ const ProductDetailPage = () => {
     ratingDistribution: []
   })
   const [availableStock, setAvailableStock] = useState(0)
+  const [productCoupons, setProductCoupons] = useState([])
+  const [loadingCoupons, setLoadingCoupons] = useState(false)
+  const [showAllCoupons, setShowAllCoupons] = useState(false)
 
   const sizes = ['S', 'M', 'L', 'XL', 'XXL', 'XXXL']
 
@@ -54,6 +59,12 @@ const ProductDetailPage = () => {
     fetchProduct()
     fetchReviewStats()
   }, [id])
+
+  useEffect(() => {
+    if (product?._id) {
+      fetchProductCoupons()
+    }
+  }, [product?._id, product?.category?._id])
 
   const fetchProduct = async () => {
     try {
@@ -104,6 +115,35 @@ const ProductDetailPage = () => {
       })
     } catch (error) {
       console.error('Error fetching review stats:', error)
+    }
+  }
+
+  const fetchProductCoupons = async () => {
+    try {
+      setLoadingCoupons(true)
+      const categoryId = product?.category?._id || product?.category
+      const response = await userApi.coupons.getCouponsForProduct(product._id, categoryId)
+      if (response.data.success) {
+        setProductCoupons(response.data.data || [])
+      }
+    } catch (error) {
+      console.error('Error fetching product coupons:', error)
+      setProductCoupons([])
+    } finally {
+      setLoadingCoupons(false)
+    }
+  }
+
+  const handleCopyCouponCode = (code) => {
+    navigator.clipboard.writeText(code)
+    toast.success(`Coupon code "${code}" copied to clipboard!`)
+  }
+
+  const formatDiscount = (coupon) => {
+    if (coupon.discountType === 'percentage') {
+      return `${coupon.discountValue}% OFF`
+    } else {
+      return `₹${coupon.discountValue} OFF`
     }
   }
 
@@ -439,6 +479,79 @@ const ProductDetailPage = () => {
                 />
                 
               </div>
+
+              {/* Available Coupons */}
+              {loadingCoupons ? (
+                <div className="pt-4">
+                  <div className="animate-pulse space-y-2">
+                    {[1, 2, 3].map((i) => (
+                      <div key={i} className="h-12 bg-muted rounded"></div>
+                    ))}
+                  </div>
+                </div>
+              ) : productCoupons.length > 0 ? (
+                <div className="pt-4">
+                  <div className="flex items-center gap-2 mb-3">
+                    <Tag className="h-4 w-4 text-primary" />
+                    <h3 className="text-sm font-semibold">Available Coupons</h3>
+                  </div>
+                  <div className="space-y-2">
+                    {(showAllCoupons ? productCoupons : productCoupons.slice(0, 3)).map((coupon) => (
+                      <div
+                        key={coupon._id || coupon.code}
+                        className="flex items-center justify-between py-2 px-3 hover:bg-muted/50 rounded transition-colors"
+                      >
+                        <div className="flex-1 min-w-0 flex items-center gap-3">
+                          <span className="font-semibold text-primary text-sm">{coupon.code}</span>
+                          <Badge variant="secondary" className="text-xs font-normal">
+                            {formatDiscount(coupon)}
+                          </Badge>
+                          {coupon.minPurchaseAmount > 0 && (
+                            <span className="text-xs text-muted-foreground hidden sm:inline">
+                              Min. ₹{coupon.minPurchaseAmount}
+                            </span>
+                          )}
+                        </div>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => handleCopyCouponCode(coupon.code)}
+                          className="shrink-0 h-8 px-2 text-xs"
+                        >
+                          <Copy className="h-3 w-3" />
+                        </Button>
+                      </div>
+                    ))}
+                    {productCoupons.length > 3 && !showAllCoupons && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setShowAllCoupons(true)}
+                        className="w-full text-xs text-primary hover:text-primary/80"
+                      >
+                        View More ({productCoupons.length - 3} more)
+                      </Button>
+                    )}
+                    {showAllCoupons && productCoupons.length > 3 && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setShowAllCoupons(false)}
+                        className="w-full text-xs text-muted-foreground hover:text-foreground"
+                      >
+                        Show Less
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              ) : (
+                <div className="pt-4">
+                  <div className="flex items-center gap-2 py-2">
+                    <Tag className="h-4 w-4 text-muted-foreground" />
+                    <p className="text-sm text-muted-foreground">No coupons available for this product</p>
+                  </div>
+                </div>
+              )}
 
               {/* Features */}
               <div className="grid grid-cols-1 gap-3 pt-4">

@@ -592,6 +592,45 @@ export const adminApi = {
         getPaymentStats: () => {
             return api.get('/admin/stats/payments');
         }
+    },
+
+    // Coupon management
+    coupons: {
+        // Get all coupons with filter
+        getCoupons: (isActive = 'all') => {
+            let params = '';
+            if (isActive === 'true') {
+                params = '?isActive=true';
+            } else if (isActive === 'false') {
+                params = '?isActive=false';
+            }
+            return api.get(`/admin/coupons${params}`);
+        },
+
+        // Get coupon by ID
+        getCouponById: (couponId) => {
+            return api.get(`/admin/coupons/${couponId}`);
+        },
+
+        // Create new coupon
+        createCoupon: (couponData) => {
+            return api.post('/admin/coupons', couponData);
+        },
+
+        // Update coupon
+        updateCoupon: (couponId, couponData) => {
+            return api.patch(`/admin/coupons/${couponId}`, couponData);
+        },
+
+        // Delete coupon
+        deleteCoupon: (couponId) => {
+            return api.delete(`/admin/coupons/${couponId}`);
+        },
+
+        // Toggle coupon status
+        toggleCouponStatus: (couponId) => {
+            return api.put(`/admin/coupons/${couponId}/toggle`);
+        }
     }
 }
 
@@ -927,6 +966,30 @@ export const userApi = {
         // Get address details by pincode
         getPincodeDetails: (pincode) => {
             return api.get(`/address/pincode/${pincode}`);
+        }
+    },
+
+    // ==================== COUPON SERVICES ====================
+    coupons: {
+        // Get all active coupons
+        getActiveCoupons: () => {
+            return api.get('/coupons');
+        },
+
+        // Get coupons for a specific product
+        getCouponsForProduct: (productId, categoryId) => {
+            const params = categoryId ? `?categoryId=${categoryId}` : '';
+            return api.get(`/coupons/product/${productId}${params}`);
+        },
+
+        // Validate coupon code
+        validateCoupon: (code, orderAmount, items = []) => {
+            return api.post('/coupons/validate', { code, orderAmount, items });
+        },
+
+        // Apply coupon code
+        applyCoupon: (code, orderAmount) => {
+            return api.post(`/coupons/${code}/apply`, { orderAmount });
         }
     }
 };

@@ -20,7 +20,9 @@ import {
   Plus,
   CheckCircle,
   Shield,
-  Search
+  Search,
+  Tag,
+  X
 } from 'lucide-react';
 import { userApi } from '@/api/api';
 import { useCartStore } from '@/store/cartStore';
@@ -53,6 +55,11 @@ const CheckoutPage = () => {
     country: 'India',
     isDefault: false
   });
+  const [couponCode, setCouponCode] = useState('');
+  const [appliedCoupon, setAppliedCoupon] = useState(null);
+  const [couponDiscount, setCouponDiscount] = useState(0);
+  const [couponError, setCouponError] = useState('');
+  const [validatingCoupon, setValidatingCoupon] = useState(false);
 
   useEffect(() => {
     fetchAddresses();
@@ -64,15 +71,16 @@ const CheckoutPage = () => {
   // Calculate shipping charges based on payment method and order amount
   useEffect(() => {
     calculateShippingCharges();
-  }, [paymentMethod, totalPrice]);
+  }, [paymentMethod, totalPrice, couponDiscount]);
 
   const calculateShippingCharges = () => {
+    const subtotalAfterDiscount = Math.max(0, totalPrice - couponDiscount);
     if (paymentMethod === 'cod') {
       // COD: Always charge ₹50 shipping
       setShippingCharges(50);
     } else if (paymentMethod === 'razorpay' || paymentMethod === 'cashfree') {
       // Online payment: Free shipping above ₹599, ₹50 below ₹599
-      if (totalPrice >= 599) {
+      if (subtotalAfterDiscount >= 599) {
         setShippingCharges(0);
       } else {
         setShippingCharges(50);
@@ -81,6 +89,49 @@ const CheckoutPage = () => {
       // Default: No shipping charges
       setShippingCharges(0);
     }
+  };
+
+  const handleApplyCoupon = async () => {
+    if (!couponCode.trim()) {
+      setCouponError('Please enter a coupon code');
+      return;
+    }
+
+    setValidatingCoupon(true);
+    setCouponError('');
+
+    try {
+      const cartItems = items.map(item => ({
+        productId: item.productId,
+        categoryId: item.categoryId
+      }));
+
+      const response = await userApi.coupons.validateCoupon(couponCode, totalPrice, cartItems);
+      
+      if (response.data.data) {
+        setAppliedCoupon({
+          code: response.data.data.coupon.code,
+          discountAmount: response.data.data.discountAmount
+        });
+        setCouponDiscount(response.data.data.discountAmount);
+        setCouponCode('');
+        toast.success('Coupon applied successfully!');
+      }
+    } catch (error) {
+      setCouponError(error.response?.data?.message || 'Invalid coupon code');
+      setAppliedCoupon(null);
+      setCouponDiscount(0);
+    } finally {
+      setValidatingCoupon(false);
+    }
+  };
+
+  const handleRemoveCoupon = () => {
+    setAppliedCoupon(null);
+    setCouponDiscount(0);
+    setCouponCode('');
+    setCouponError('');
+    toast.success('Coupon removed');
   };
 
   const initializeCashfreeSDK = async () => {
@@ -314,7 +365,9 @@ const CheckoutPage = () => {
       paymentProvider: null,
       transactionId: null,
       shippingCharges: shippingCharges,
-      totalAmount: totalPrice + shippingCharges
+      totalAmount: Math.max(0, totalPrice - couponDiscount) + shippingCharges,
+      couponCode: appliedCoupon?.code || null,
+      couponDiscount: couponDiscount
     };
 
     console.log('COD Order data being sent:', JSON.stringify(orderData, null, 2));
@@ -341,10 +394,14 @@ const CheckoutPage = () => {
     
     try {
       if (paymentMethod === 'razorpay') {
+        // Calculate final amount after discount
+        const finalAmount = Math.max(0, totalPrice - couponDiscount) + shippingCharges;
+        // Round to 2 decimal places, then convert to paise and ensure it's an integer
+        const amountInPaise = Math.round(parseFloat(finalAmount.toFixed(2)) * 100);
         // For Razorpay, use the existing payment order creation
         const paymentData = {
           orderId: tempOrderId,
-          amount: (totalPrice + shippingCharges) * 100, // Convert to paise/cents
+          amount: amountInPaise, // Convert to paise/cents (use discounted amount) - must be integer
           provider: 'razorpay',
           customerName: selectedAddressObj.phone,
           customerEmail: 'customer@example.com',
@@ -360,10 +417,14 @@ const CheckoutPage = () => {
           throw new Error('Failed to create Razorpay payment order');
         }
       } else if (paymentMethod === 'cashfree') {
+        // Calculate final amount after discount
+        const finalAmount = Math.max(0, totalPrice - couponDiscount) + shippingCharges;
+        // Round to 2 decimal places, then convert to paise and ensure it's an integer
+        const amountInPaise = Math.round(parseFloat(finalAmount.toFixed(2)) * 100);
         // For Cashfree, use the simple payment approach
         const paymentResponse = await userApi.payments.createSimplePayment({
           orderId: tempOrderId,
-          amount: (totalPrice + shippingCharges) * 100 // Convert to paise
+          amount: amountInPaise // Convert to paise (use discounted amount) - must be integer
         });
 
         if (!paymentResponse.data.success) {
@@ -532,7 +593,9 @@ const CheckoutPage = () => {
         paymentProvider: paymentMethod,
         transactionId: transactionId,
         shippingCharges: shippingCharges,
-        totalAmount: totalPrice + shippingCharges
+        totalAmount: Math.max(0, totalPrice - couponDiscount) + shippingCharges,
+        couponCode: appliedCoupon?.code || null,
+        couponDiscount: couponDiscount
       };
 
       console.log('Order data being sent:', JSON.stringify(orderData, null, 2));
@@ -1017,12 +1080,71 @@ const CheckoutPage = () => {
 
                 <Separator />
 
+                {/* Coupon Section */}
+                <div className="space-y-2">
+                  {!appliedCoupon ? (
+                    <div className="flex gap-2">
+                      <Input
+                        placeholder="Enter coupon code"
+                        value={couponCode}
+                        onChange={(e) => {
+                          setCouponCode(e.target.value.toUpperCase());
+                          setCouponError('');
+                        }}
+                        onKeyPress={(e) => {
+                          if (e.key === 'Enter') {
+                            handleApplyCoupon();
+                          }
+                        }}
+                        className="flex-1"
+                      />
+                      <Button
+                        onClick={handleApplyCoupon}
+                        disabled={validatingCoupon || !couponCode.trim()}
+                        size="sm"
+                      >
+                        <Tag className="h-4 w-4 mr-1" />
+                        Apply
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="flex items-center justify-between p-2 bg-green-50 dark:bg-green-900/20 rounded-md">
+                      <div className="flex items-center gap-2">
+                        <Tag className="h-4 w-4 text-green-600" />
+                        <span className="text-sm font-medium">{appliedCoupon.code}</span>
+                        <Badge variant="outline" className="text-xs">
+                          -₹{appliedCoupon.discountAmount.toLocaleString()}
+                        </Badge>
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={handleRemoveCoupon}
+                        className="h-6 w-6 p-0"
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  )}
+                  {couponError && (
+                    <p className="text-xs text-red-500">{couponError}</p>
+                  )}
+                </div>
+
+                <Separator />
+
                 {/* Order Totals */}
                 <div className="space-y-2">
                   <div className="flex justify-between text-sm">
                     <span>Subtotal:</span>
                     <span>₹{totalPrice.toLocaleString()}</span>
                   </div>
+                  {couponDiscount > 0 && (
+                    <div className="flex justify-between text-sm text-green-600">
+                      <span>Coupon Discount:</span>
+                      <span>-₹{couponDiscount.toLocaleString()}</span>
+                    </div>
+                  )}
                   <div className="flex justify-between text-sm">
                     <span>Shipping:</span>
                     <span className={shippingCharges === 0 ? "text-green-600" : ""}>
@@ -1032,7 +1154,7 @@ const CheckoutPage = () => {
                   <Separator />
                   <div className="flex justify-between font-semibold">
                     <span>Total:</span>
-                    <span>₹{(totalPrice + shippingCharges).toLocaleString()}</span>
+                    <span>₹{(Math.max(0, totalPrice - couponDiscount) + shippingCharges).toLocaleString()}</span>
                   </div>
                 </div>
               </CardContent>

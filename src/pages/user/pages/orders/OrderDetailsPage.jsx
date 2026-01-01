@@ -25,7 +25,8 @@ import {
   X,
   RotateCcw,
   AlertCircle,
-  ArrowLeft
+  ArrowLeft,
+  Tag
 } from 'lucide-react'
 import RefundRequestForm from '@/components/ui/RefundRequestForm'
 import {
@@ -291,9 +292,38 @@ const OrderDetailsPage = () => {
                       </div>
                     </div>
                   </div>
-                  <div className="pt-4 border-t border-border/50">
-                    <div className="text-sm text-muted-foreground mb-1">Total Amount</div>
-                    <div className="text-2xl font-bold text-primary">₹{formatPrice(order.totalAmount)}</div>
+                  <div className="pt-4 border-t border-border/50 space-y-2">
+                    {order.amount?.subtotal && (
+                      <div className="flex justify-between text-sm">
+                        <span className="text-muted-foreground">Subtotal:</span>
+                        <span>₹{formatPrice(order.amount.subtotal)}</span>
+                      </div>
+                    )}
+                    {order.coupon && order.coupon.code && order.amount?.couponDiscount > 0 && (
+                      <div className="flex justify-between text-sm">
+                        <span className="text-muted-foreground flex items-center gap-1">
+                          <Tag className="h-3 w-3" />
+                          Coupon ({order.coupon.code}):
+                        </span>
+                        <span className="text-green-600 font-medium">
+                          -₹{formatPrice(order.amount.couponDiscount)}
+                        </span>
+                      </div>
+                    )}
+                    {order.amount?.shippingCharges !== undefined && (
+                      <div className="flex justify-between text-sm">
+                        <span className="text-muted-foreground">Shipping:</span>
+                        <span>
+                          {order.amount.shippingCharges === 0 ? (
+                            <span className="text-green-600">Free</span>
+                          ) : (
+                            `₹${formatPrice(order.amount.shippingCharges)}`
+                          )}
+                        </span>
+                      </div>
+                    )}
+                    <div className="text-sm text-muted-foreground mb-1 pt-2 border-t">Total Amount</div>
+                    <div className="text-2xl font-bold text-primary">₹{formatPrice(order.amount?.totalAmount || order.totalAmount)}</div>
                   </div>
                 </div>
 
@@ -320,8 +350,39 @@ const OrderDetailsPage = () => {
                     </div>
                   </div>
                   <div>
-                    <div className="text-sm text-muted-foreground mb-2">Total Amount</div>
-                    <div className="text-2xl font-bold text-primary">₹{formatPrice(order.totalAmount)}</div>
+                    <div className="text-sm text-muted-foreground mb-2">Order Summary</div>
+                    <div className="space-y-1 text-sm">
+                      {order.amount?.subtotal && (
+                        <div className="flex justify-between">
+                          <span className="text-muted-foreground">Subtotal:</span>
+                          <span>₹{formatPrice(order.amount.subtotal)}</span>
+                        </div>
+                      )}
+                      {order.coupon && order.coupon.code && order.amount?.couponDiscount > 0 && (
+                        <div className="flex justify-between">
+                          <span className="text-muted-foreground flex items-center gap-1">
+                            <Tag className="h-3 w-3" />
+                            Coupon ({order.coupon.code}):
+                          </span>
+                          <span className="text-green-600 font-medium">
+                            -₹{formatPrice(order.amount.couponDiscount)}
+                          </span>
+                        </div>
+                      )}
+                      {order.amount?.shippingCharges !== undefined && (
+                        <div className="flex justify-between">
+                          <span className="text-muted-foreground">Shipping:</span>
+                          <span>
+                            {order.amount.shippingCharges === 0 ? (
+                              <span className="text-green-600">Free</span>
+                            ) : (
+                              `₹${formatPrice(order.amount.shippingCharges)}`
+                            )}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                    <div className="text-2xl font-bold text-primary mt-2 pt-2 border-t">₹{formatPrice(order.amount?.totalAmount || order.totalAmount)}</div>
                   </div>
                 </div>
               </CardContent>
@@ -647,6 +708,50 @@ const OrderDetailsPage = () => {
                       </div>
                     </div>
                   )}
+
+                  {/* Order Summary */}
+                  <div className="pt-4 border-t">
+                    <div className="text-sm font-medium mb-3">Order Summary</div>
+                    <div className="space-y-2">
+                      {/* Subtotal */}
+                      <div className="flex justify-between text-sm">
+                        <span className="text-muted-foreground">Subtotal:</span>
+                        <span>₹{order.amount?.subtotal ? formatPrice(order.amount.subtotal) : 
+                          order.items?.reduce((sum, item) => sum + (item.amount * item.quantity), 0).toFixed(2) || '0.00'}</span>
+                      </div>
+
+                      {/* Coupon Discount */}
+                      {order.coupon && order.coupon.code && order.amount?.couponDiscount > 0 && (
+                        <div className="flex justify-between text-sm">
+                          <span className="text-muted-foreground flex items-center gap-1">
+                            <Tag className="h-3 w-3" />
+                            Coupon ({order.coupon.code}):
+                          </span>
+                          <span className="text-green-600 font-medium">
+                            -₹{formatPrice(order.amount.couponDiscount)}
+                          </span>
+                        </div>
+                      )}
+
+                      {/* Shipping */}
+                      <div className="flex justify-between text-sm">
+                        <span className="text-muted-foreground">Shipping:</span>
+                        <span>
+                          {order.amount?.shippingCharges === 0 ? (
+                            <span className="text-green-600">Free</span>
+                          ) : (
+                            `₹${formatPrice(order.amount?.shippingCharges || 0)}`
+                          )}
+                        </span>
+                      </div>
+
+                      {/* Total */}
+                      <div className="flex justify-between text-lg font-bold pt-2 border-t">
+                        <span>Total:</span>
+                        <span className="text-primary">₹{formatPrice(order.amount?.totalAmount || order.totalAmount)}</span>
+                      </div>
+                    </div>
+                  </div>
                   
                   <div>
                     <div className="text-sm text-muted-foreground mb-1">Payment Status</div>

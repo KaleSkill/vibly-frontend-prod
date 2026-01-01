@@ -23,7 +23,8 @@ import {
   CreditCard,
   Percent,
   RotateCcw,
-  Truck
+  Truck,
+  Ticket
 } from 'lucide-react'
 import {
   DropdownMenu,
@@ -96,6 +97,7 @@ const AdminLayout = () => {
     { name: 'Banners', href: '/admin/banners', icon: Image, current: location.pathname === '/admin/banners' },
     { name: 'Colors', href: '/admin/colors', icon: Palette, current: location.pathname === '/admin/colors' },
     { name: 'Categories', href: '/admin/categories', icon: Tag, current: location.pathname === '/admin/categories' },
+    { name: 'Coupons', href: '/admin/coupons', icon: Ticket, current: location.pathname === '/admin/coupons' },
     { name: 'Orders', href: '/admin/orders', icon: ShoppingCart, current: location.pathname === '/admin/orders' },
     { name: 'Payments', href: '/admin/payments', icon: CreditCard, current: location.pathname === '/admin/payments' },
     { name: 'Refunds', href: '/admin/refunds', icon: RotateCcw, current: location.pathname === '/admin/refunds' },

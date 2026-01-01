@@ -23,6 +23,7 @@ import PaymentManagement from './pages/admin/pages/PaymentManagement'
 import { OrderManagement } from './pages/admin/components/OrderManagement'
 import { OrderDetailsPage } from './pages/admin/pages/OrderDetailsPage'
 import RefundManagement from './pages/admin/components/RefundManagement'
+import CouponManagement from './pages/admin/components/CouponManagement'
 import ShiprocketManagement from './pages/admin/pages/ShiprocketManagement'
 import ShiprocketDashboard from './pages/admin/pages/shiprocket-management/ShiprocketDashboard'
 import ProductsPage from './pages/user/pages/shopping/ProductsPage'
@@ -128,6 +129,7 @@ const App = () => {
           <Route path="orders/:orderId" element={<OrderDetailsPage />} />
           <Route path="payments" element={<PaymentManagement />} />
           <Route path="refunds" element={<RefundManagement />} />
+          <Route path="coupons" element={<CouponManagement />} />
           <Route path="shiprocket" element={<ShiprocketManagement />} />
           <Route path="shiprocket/dashboard" element={<ShiprocketDashboard />} />
           <Route path="analytics" element={<div className="p-6"><h1 className="text-2xl font-bold">Analytics</h1></div>} />

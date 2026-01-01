@@ -15,7 +15,8 @@ import {
   Clock,
   XCircle,
   Receipt,
-  Hash
+  Hash,
+  Tag
 } from 'lucide-react'
 import { getStatusColor } from '@/utils/orderStatus'
 
@@ -238,10 +239,41 @@ const MyOrdersPage = () => {
                       )}
                     </div>
 
-                    {/* Total Price */}
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm font-medium">Total Amount</span>
-                      <span className="text-lg font-bold text-primary">₹{formatPrice(order.totalAmount)}</span>
+                    {/* Order Summary */}
+                    <div className="space-y-2 pt-2 border-t border-border/50">
+                      {order.amount?.subtotal && (
+                        <div className="flex justify-between text-xs">
+                          <span className="text-muted-foreground">Subtotal:</span>
+                          <span>₹{formatPrice(order.amount.subtotal)}</span>
+                        </div>
+                      )}
+                      {order.coupon && order.coupon.code && order.amount?.couponDiscount > 0 && (
+                        <div className="flex justify-between text-xs">
+                          <span className="text-muted-foreground flex items-center gap-1">
+                            <Tag className="h-3 w-3" />
+                            Coupon ({order.coupon.code}):
+                          </span>
+                          <span className="text-green-600 font-medium">
+                            -₹{formatPrice(order.amount.couponDiscount)}
+                          </span>
+                        </div>
+                      )}
+                      {order.amount?.shippingCharges !== undefined && (
+                        <div className="flex justify-between text-xs">
+                          <span className="text-muted-foreground">Shipping:</span>
+                          <span>
+                            {order.amount.shippingCharges === 0 ? (
+                              <span className="text-green-600">Free</span>
+                            ) : (
+                              `₹${formatPrice(order.amount.shippingCharges)}`
+                            )}
+                          </span>
+                        </div>
+                      )}
+                      <div className="flex items-center justify-between pt-1 border-t border-border/50">
+                        <span className="text-sm font-medium">Total Amount</span>
+                        <span className="text-lg font-bold text-primary">₹{formatPrice(order.amount?.totalAmount || order.totalAmount)}</span>
+                      </div>
                     </div>
 
                     {/* View Button */}
@@ -334,10 +366,41 @@ const MyOrdersPage = () => {
                         )}
                       </div>
 
-                      {/* Total Price */}
+                      {/* Order Summary */}
                       <div className="text-right">
-                        <div className="text-sm text-muted-foreground mb-1">Total Amount</div>
-                        <div className="text-xl font-bold text-primary">₹{formatPrice(order.totalAmount)}</div>
+                        <div className="text-xs text-muted-foreground mb-2 space-y-1">
+                          {order.amount?.subtotal && (
+                            <div className="flex justify-end gap-4">
+                              <span>Subtotal:</span>
+                              <span>₹{formatPrice(order.amount.subtotal)}</span>
+                            </div>
+                          )}
+                          {order.coupon && order.coupon.code && order.amount?.couponDiscount > 0 && (
+                            <div className="flex justify-end gap-4 items-center">
+                              <span className="flex items-center gap-1">
+                                <Tag className="h-3 w-3" />
+                                Coupon ({order.coupon.code}):
+                              </span>
+                              <span className="text-green-600 font-medium">
+                                -₹{formatPrice(order.amount.couponDiscount)}
+                              </span>
+                            </div>
+                          )}
+                          {order.amount?.shippingCharges !== undefined && (
+                            <div className="flex justify-end gap-4">
+                              <span>Shipping:</span>
+                              <span>
+                                {order.amount.shippingCharges === 0 ? (
+                                  <span className="text-green-600">Free</span>
+                                ) : (
+                                  `₹${formatPrice(order.amount.shippingCharges)}`
+                                )}
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                        <div className="text-sm text-muted-foreground mb-1 pt-1 border-t border-border/50">Total Amount</div>
+                        <div className="text-xl font-bold text-primary">₹{formatPrice(order.amount?.totalAmount || order.totalAmount)}</div>
                       </div>
                     </div>
 
