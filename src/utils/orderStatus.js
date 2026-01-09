@@ -2,7 +2,7 @@
  * Order Status Configuration
  * 
  * IMPORTANT: This must match the backend OrderStatus model exactly.
- * Backend location: backend/src/models/newOrder.model.js
+ * Backend location: backend/src/models/order.model.js
  * 
  * Status Flow (Forward Only):
  * - Ordered → Cancelled | Shipped

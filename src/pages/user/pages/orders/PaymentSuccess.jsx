@@ -41,7 +41,7 @@ const PaymentSuccess = () => {
     
     try {
       setLoading(true);
-      const response = await userApi.newOrders.getOrderByOrderId(orderId);
+      const response = await userApi.orders.getOrderByOrderId(orderId);
       console.log('Order fetch response:', response);
       
       if (response.data.success) {

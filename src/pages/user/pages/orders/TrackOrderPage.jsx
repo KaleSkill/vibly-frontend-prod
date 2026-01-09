@@ -36,7 +36,7 @@ const TrackOrderPage = () => {
       setLoading(true);
       
       // First get order details
-      const orderResponse = await userApi.newOrders.getOrderByOrderId(orderId);
+      const orderResponse = await userApi.orders.getOrderByOrderId(orderId);
       if (orderResponse.data.success) {
         setOrder(orderResponse.data.data);
         

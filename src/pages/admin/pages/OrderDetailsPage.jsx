@@ -26,7 +26,7 @@ export const OrderDetailsPage = () => {
   const fetchOrderDetails = async () => {
     try {
       setLoading(true);
-      const response = await adminApi.newOrders.getOrderItemsByOrderId(orderId);
+      const response = await adminApi.orders.getOrderItemsByOrderId(orderId);
       
       if (response.data.success) {
         setOrderDetails(response.data.data);

@@ -471,35 +471,35 @@ export const adminApi = {
     },
 
     // Order management
-    newOrders: {
+    orders: {
         // Get all orders with filters and pagination
         getAllOrders: (queryString = '') => {
-            return api.get(`/admin/newOrders${queryString ? '?' + queryString : ''}`);
+            return api.get(`/admin/orders${queryString ? '?' + queryString : ''}`);
         },
 
         // Get order items by order ID
         getOrderItemsByOrderId: (orderId) => {
-            return api.get(`/admin/newOrders/${orderId}/items`);
+            return api.get(`/admin/orders/${orderId}/items`);
         },
 
         // Update order item status (manual update)
         updateOrderItemStatus: (itemId, data) => {
-            return api.put(`/admin/newOrders/items/${itemId}/update-status`, data);
+            return api.put(`/admin/orders/items/${itemId}/update-status`, data);
         },
 
         // Get available status transitions for an item
         getAvailableStatusTransitions: (itemId) => {
-            return api.get(`/admin/newOrders/items/${itemId}/available-transitions`);
+            return api.get(`/admin/orders/items/${itemId}/available-transitions`);
         },
 
         // Process refund for returned item
         processRefund: (data) => {
-            return api.put('/admin/newOrders/items/refund', data);
+            return api.put('/admin/orders/items/refund', data);
         },
 
         // Cancel return request
         processReturnCancel: (data) => {
-            return api.put('/admin/newOrders/items/return-cancel', data);
+            return api.put('/admin/orders/items/return-cancel', data);
         },
 
         // Get all return requests
@@ -509,45 +509,45 @@ export const adminApi = {
             params.push(`page=${page}`);
             params.push(`limit=${limit}`);
             const queryString = `?${params.join('&')}`;
-            return api.get(`/admin/newOrders/returns${queryString}`);
+            return api.get(`/admin/orders/returns${queryString}`);
         },
 
         // Get return request details
         getReturnRequestDetails: (returnId) => {
-            return api.get(`/admin/newOrders/returns/${returnId}`);
+            return api.get(`/admin/orders/returns/${returnId}`);
         },
 
         // Update return request status
         updateReturnStatus: (returnId, status, note = '') => {
-            return api.put(`/admin/newOrders/returns/${returnId}/status`, { status, note });
+            return api.put(`/admin/orders/returns/${returnId}/status`, { status, note });
         },
 
         // Get all refund requests
         getAllRefundRequests: () => {
-            return api.get('/admin/newOrders/refunds');
+            return api.get('/admin/orders/refunds');
         },
 
         // Approve refund request
         approveRefund: (refundRequestId, refundAmount) => {
-            return api.put(`/admin/newOrders/refunds/${refundRequestId}/approve`, { refundAmount });
+            return api.put(`/admin/orders/refunds/${refundRequestId}/approve`, { refundAmount });
         },
 
         // Reject refund request
         rejectRefund: (refundRequestId, rejectionReason) => {
-            return api.put(`/admin/newOrders/refunds/${refundRequestId}/reject`, { rejectionReason });
+            return api.put(`/admin/orders/refunds/${refundRequestId}/reject`, { rejectionReason });
         },
 
         // Shiprocket shipping steps
         createAdhocOrderStep: (orderId, shippingData) => {
-            return api.post(`/admin/newOrders/${orderId}/create-adhoc-order`, shippingData);
+            return api.post(`/admin/orders/${orderId}/create-adhoc-order`, shippingData);
         },
 
         assignAWBStep: (orderId) => {
-            return api.post(`/admin/newOrders/${orderId}/assign-awb`);
+            return api.post(`/admin/orders/${orderId}/assign-awb`);
         },
 
         generatePickupStep: (orderId) => {
-            return api.post(`/admin/newOrders/${orderId}/generate-pickup`);
+            return api.post(`/admin/orders/${orderId}/generate-pickup`);
         }
     },
 
@@ -773,46 +773,46 @@ export const userApi = {
         }
     },
 
-    // New Order management (using newOrder controller)
-    newOrders: {
+    // New Order management (using order controller)
+    orders: {
         // Create new order
         createOrder: (orderData) => {
-            return api.post('/newOrders', orderData);
+            return api.post('/orders', orderData);
         },
 
         // Get user orders
         getUserOrders: () => {
-            return api.get('/newOrders');
+            return api.get('/orders');
         },
 
         // Get order by order ID
         getOrderByOrderId: (orderId) => {
-            return api.get(`/newOrders/${orderId}`);
+            return api.get(`/orders/${orderId}`);
         },
 
         // Cancel order item
         cancelOrderItem: (itemId, quantity) => {
-            return api.put('/newOrders/cancel', { itemId, quantity });
+            return api.put('/orders/cancel', { itemId, quantity });
         },
 
         // Return order item
         returnOrderItem: (itemId, quantity, note) => {
-            return api.put('/newOrders/return', { itemId, quantity, note });
+            return api.put('/orders/return', { itemId, quantity, note });
         },
 
         // Cancel return request
         cancelReturnRequest: (itemId, quantity) => {
-            return api.put('/newOrders/return-cancel', { itemId, quantity });
+            return api.put('/orders/return-cancel', { itemId, quantity });
         },
 
         // Request refund
         requestRefund: (refundData) => {
-            return api.post('/newOrders/refund/request', refundData);
+            return api.post('/orders/refund/request', refundData);
         },
 
         // Get user refund requests
         getRefundRequests: () => {
-            return api.get('/newOrders/refund/requests');
+            return api.get('/orders/refund/requests');
         }
     },
 
@@ -820,27 +820,27 @@ export const userApi = {
     addresses: {
         // Get user addresses
         getUserAddresses: () => {
-            return api.get('/newOrders/addresses');
+            return api.get('/orders/addresses');
         },
 
         // Add new address
         addAddress: (addressData) => {
-            return api.post('/newOrders/addresses', addressData);
+            return api.post('/orders/addresses', addressData);
         },
 
         // Update address
         updateAddress: (addressId, addressData) => {
-            return api.put(`/newOrders/addresses/${addressId}`, addressData);
+            return api.put(`/orders/addresses/${addressId}`, addressData);
         },
 
         // Delete address
         deleteAddress: (addressId) => {
-            return api.delete(`/newOrders/addresses/${addressId}`);
+            return api.delete(`/orders/addresses/${addressId}`);
         },
 
         // Set default address
         setDefaultAddress: (addressId) => {
-            return api.put(`/newOrders/addresses/${addressId}/default`);
+            return api.put(`/orders/addresses/${addressId}/default`);
         }
     },
 

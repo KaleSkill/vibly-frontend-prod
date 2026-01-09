@@ -371,7 +371,7 @@ const CheckoutPage = () => {
     };
 
     console.log('COD Order data being sent:', JSON.stringify(orderData, null, 2));
-    const orderResponse = await userApi.newOrders.createOrder(orderData);
+    const orderResponse = await userApi.orders.createOrder(orderData);
     console.log('COD Order creation response:', orderResponse);
     
     if (orderResponse.data.success) {
@@ -599,7 +599,7 @@ const CheckoutPage = () => {
       };
 
       console.log('Order data being sent:', JSON.stringify(orderData, null, 2));
-      const orderResponse = await userApi.newOrders.createOrder(orderData);
+      const orderResponse = await userApi.orders.createOrder(orderData);
       console.log('Order creation response:', orderResponse);
       
       if (orderResponse.data.success) {

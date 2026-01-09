@@ -24,7 +24,7 @@ const RefundTrackingPage = () => {
   const fetchRefundRequests = async () => {
     try {
       setLoading(true)
-      const response = await userApi.newOrders.getRefundRequests()
+      const response = await userApi.orders.getRefundRequests()
       if (response.data.success) {
         setRefundRequests(response.data.data)
       }

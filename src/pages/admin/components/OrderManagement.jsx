@@ -1,14 +1,32 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { adminApi, authApi } from '@/api/api';
-import { toast } from 'sonner';
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { adminApi, authApi } from "@/api/api";
+import { toast } from "sonner";
 import {
   Search,
   Eye,
@@ -19,10 +37,10 @@ import {
   Truck,
   MoreHorizontal,
   Settings,
-  ShoppingCart
-} from 'lucide-react';
-import { StatusUpdateModal } from './StatusUpdateModal';
-import { getStatusColor } from '@/utils/orderStatus';
+  ShoppingCart,
+} from "lucide-react";
+import { StatusUpdateModal } from "./StatusUpdateModal";
+import { getStatusColor } from "@/utils/orderStatus";
 
 export const OrderManagement = () => {
   const navigate = useNavigate();
@@ -38,9 +56,9 @@ export const OrderManagement = () => {
 
   // Filters
   const [filters, setFilters] = useState({
-    status: '',
-    paymentStatus: '',
-    search: ''
+    status: "",
+    paymentStatus: "",
+    search: "",
   });
 
   const fetchOrders = async () => {
@@ -48,13 +66,13 @@ export const OrderManagement = () => {
       setLoading(true);
       const params = new URLSearchParams({
         page: page.toString(),
-        limit: '20',
+        limit: "20",
         ...(filters.status && { status: filters.status }),
-        ...(filters.paymentStatus && { paymentStatus: filters.paymentStatus })
+        ...(filters.paymentStatus && { paymentStatus: filters.paymentStatus }),
       });
 
-      const response = await adminApi.newOrders.getAllOrders(params.toString());
-      console.log("order seeeee", response.data.data)
+      const response = await adminApi.orders.getAllOrders(params.toString());
+      console.log("order seeeee", response.data.data);
 
       if (response.data.success) {
         setOrders(response.data.data);
@@ -62,8 +80,8 @@ export const OrderManagement = () => {
         setStatusSummary(response.data.statusSummary);
       }
     } catch (error) {
-      console.error('Error fetching orders:', error);
-      toast.error('Failed to fetch orders');
+      console.error("Error fetching orders:", error);
+      toast.error("Failed to fetch orders");
     } finally {
       setLoading(false);
     }
@@ -76,11 +94,10 @@ export const OrderManagement = () => {
       console.log("user details", response.data.data);
       return response.data.data;
     } catch (error) {
-      console.error('Error fetching user details:', error);
+      console.error("Error fetching user details:", error);
       return null;
     }
-  }
-
+  };
 
   useEffect(() => {
     fetchOrders();
@@ -108,43 +125,41 @@ export const OrderManagement = () => {
     fetchUserDetailsForOrders();
   }, [orders]);
 
-
-
-
-
-
   const handleStatusFilter = (status) => {
-    setFilters(prev => ({ ...prev, status }));
+    setFilters((prev) => ({ ...prev, status }));
     setPage(1);
   };
 
   const handlePaymentStatusFilter = (paymentStatus) => {
-    setFilters(prev => ({ ...prev, paymentStatus }));
+    setFilters((prev) => ({ ...prev, paymentStatus }));
     setPage(1);
   };
 
   const handleSearch = (search) => {
-    setFilters(prev => ({ ...prev, search }));
+    setFilters((prev) => ({ ...prev, search }));
     setPage(1);
   };
 
   const getStatusBadgeColor = (status) => {
     return getStatusColor(status);
-    
   };
 
   const getPaymentStatusBadgeColor = (status) => {
     const colors = {
-      'PENDING': 'bg-yellow-100 text-yellow-800',
-      'PAID': 'bg-green-100 text-green-800',
-      'FAILED': 'bg-red-100 text-red-800',
-      'REFUNDED': 'bg-purple-100 text-purple-800'
+      PENDING: "bg-yellow-100 text-yellow-800",
+      PAID: "bg-green-100 text-green-800",
+      FAILED: "bg-red-100 text-red-800",
+      REFUNDED: "bg-purple-100 text-purple-800",
     };
-    return colors[status] || 'bg-gray-100 text-gray-800';
+    return colors[status] || "bg-gray-100 text-gray-800";
   };
 
   const getPaymentMethodIcon = (method) => {
-    return method === 'COD' ? <Package className="h-4 w-4" /> : <CreditCard className="h-4 w-4" />;
+    return method === "COD" ? (
+      <Package className="h-4 w-4" />
+    ) : (
+      <CreditCard className="h-4 w-4" />
+    );
   };
 
   const handleViewOrder = (order) => {
@@ -161,11 +176,11 @@ export const OrderManagement = () => {
   };
 
   const getImageUrl = (imageData) => {
-    if (!imageData) return '/placeholder-product.jpg';
-    if (typeof imageData === 'string') return imageData;
+    if (!imageData) return "/placeholder-product.jpg";
+    if (typeof imageData === "string") return imageData;
     if (imageData.secure_url) return imageData.secure_url;
     if (imageData.url) return imageData.url;
-    return '/placeholder-product.jpg';
+    return "/placeholder-product.jpg";
   };
 
   return (
@@ -181,7 +196,6 @@ export const OrderManagement = () => {
           Refresh
         </Button>
       </div>
-
 
       {/* Order Status Overview */}
       <Card>
@@ -201,7 +215,9 @@ export const OrderManagement = () => {
                       <Truck className="h-4 w-4 text-muted-foreground" />
                     </div>
                     <div>
-                      <p className="text-xs font-medium text-muted-foreground">{status}</p>
+                      <p className="text-xs font-medium text-muted-foreground">
+                        {status}
+                      </p>
                       <p className="text-xl font-bold">{count}</p>
                     </div>
                   </div>
@@ -237,7 +253,12 @@ export const OrderManagement = () => {
 
             <div className="space-y-2">
               <label className="text-sm font-medium">Order Status</label>
-              <Select value={filters.status || "all"} onValueChange={(value) => handleStatusFilter(value === "all" ? "" : value)}>
+              <Select
+                value={filters.status || "all"}
+                onValueChange={(value) =>
+                  handleStatusFilter(value === "all" ? "" : value)
+                }
+              >
                 <SelectTrigger>
                   <SelectValue placeholder="All Statuses" />
                 </SelectTrigger>
@@ -247,7 +268,9 @@ export const OrderManagement = () => {
                   <SelectItem value="Shipped">Shipped</SelectItem>
                   <SelectItem value="Delivered">Delivered</SelectItem>
                   <SelectItem value="Cancelled">Cancelled</SelectItem>
-                  <SelectItem value="Return Requested">Return Requested</SelectItem>
+                  <SelectItem value="Return Requested">
+                    Return Requested
+                  </SelectItem>
                   <SelectItem value="Returned">Returned</SelectItem>
                   <SelectItem value="Refunded">Refunded</SelectItem>
                 </SelectContent>
@@ -256,7 +279,12 @@ export const OrderManagement = () => {
 
             <div className="space-y-2">
               <label className="text-sm font-medium">Payment Status</label>
-              <Select value={filters.paymentStatus || "all"} onValueChange={(value) => handlePaymentStatusFilter(value === "all" ? "" : value)}>
+              <Select
+                value={filters.paymentStatus || "all"}
+                onValueChange={(value) =>
+                  handlePaymentStatusFilter(value === "all" ? "" : value)
+                }
+              >
                 <SelectTrigger>
                   <SelectValue placeholder="All Payments" />
                 </SelectTrigger>
@@ -304,50 +332,68 @@ export const OrderManagement = () => {
                 <TableBody>
                   {orders.map((order) => (
                     <TableRow key={order.orderId}>
-                      <TableCell className="font-medium">{order.orderId}</TableCell>
+                      <TableCell className="font-medium">
+                        {order.orderId}
+                      </TableCell>
                       <TableCell>
                         <div>
                           <p className="font-medium">
                             {loadingUserDetails ? (
-                              <span className="text-muted-foreground">Loading...</span>
-                            ) : userDetails[order.user?._id]?.firstname
-                              ? `${userDetails[order.user._id].firstname}`
-                              : userDetails[order.user?._id]?.firstname || 'Unknown Customer'
-                            }
+                              <span className="text-muted-foreground">
+                                Loading...
+                              </span>
+                            ) : userDetails[order.user?._id]?.firstname ? (
+                              `${userDetails[order.user._id].firstname}`
+                            ) : (
+                              userDetails[order.user?._id]?.firstname ||
+                              "Unknown Customer"
+                            )}
                           </p>
                           <p className="text-sm text-muted-foreground">
-                            {userDetails[order.user?._id]?.email || order.user?.email || 'No email'}
+                            {userDetails[order.user?._id]?.email ||
+                              order.user?.email ||
+                              "No email"}
                           </p>
                           {order.shippingInfo?.phone && (
-                            <p className="text-xs text-muted-foreground">📞 {order.shippingInfo.phone}</p>
+                            <p className="text-xs text-muted-foreground">
+                              📞 {order.shippingInfo.phone}
+                            </p>
                           )}
                         </div>
                       </TableCell>
                       <TableCell>
                         <div className="space-y-2 max-w-xs">
-                          {order.items && order.items.slice(0, 2).map((item, index) => (
-                            <div key={index} className="flex items-center gap-2 p-2 border rounded-lg hover:bg-muted/50 transition-colors">
-                              <img
-                                src={getImageUrl(item.product?.image)}
-                                alt={item.product?.name || 'Product'}
-                                className="w-8 h-8 object-cover rounded flex-shrink-0"
-                                onError={(e) => {
-                                  e.target.src = '/placeholder-product.jpg';
-                                }}
-                              />
-                              <div className="flex-1 min-w-0">
-                                <p className="text-sm font-medium truncate" title={item.product?.name || 'Product'}>
-                                  {item.product?.name || 'Product'}
-                                </p>
-                                <p className="text-xs text-muted-foreground">
-                                  {item.color?.name} • {item.size} • Qty: {item.quantity}
-                                </p>
-                                <p className="text-xs font-medium text-green-600">
-                                  ₹{formatPrice(item.amount)}
-                                </p>
+                          {order.items &&
+                            order.items.slice(0, 2).map((item, index) => (
+                              <div
+                                key={index}
+                                className="flex items-center gap-2 p-2 border rounded-lg hover:bg-muted/50 transition-colors"
+                              >
+                                <img
+                                  src={getImageUrl(item.product?.image)}
+                                  alt={item.product?.name || "Product"}
+                                  className="w-8 h-8 object-cover rounded flex-shrink-0"
+                                  onError={(e) => {
+                                    e.target.src = "/placeholder-product.jpg";
+                                  }}
+                                />
+                                <div className="flex-1 min-w-0">
+                                  <p
+                                    className="text-sm font-medium truncate"
+                                    title={item.product?.name || "Product"}
+                                  >
+                                    {item.product?.name || "Product"}
+                                  </p>
+                                  <p className="text-xs text-muted-foreground">
+                                    {item.color?.name} • {item.size} • Qty:{" "}
+                                    {item.quantity}
+                                  </p>
+                                  <p className="text-xs font-medium text-green-600">
+                                    ₹{formatPrice(item.amount)}
+                                  </p>
+                                </div>
                               </div>
-                            </div>
-                          ))}
+                            ))}
                           {order.items && order.items.length > 2 && (
                             <div className="text-center">
                               <Button
@@ -356,8 +402,8 @@ export const OrderManagement = () => {
                                 className="text-xs h-6"
                                 onClick={() => handleViewOrder(order)}
                               >
-                                <Eye className="h-3 w-3 mr-1" />
-                                +{order.items.length - 2} more items
+                                <Eye className="h-3 w-3 mr-1" />+
+                                {order.items.length - 2} more items
                               </Button>
                             </div>
                           )}
@@ -372,8 +418,14 @@ export const OrderManagement = () => {
                         <div className="flex items-center gap-2">
                           {getPaymentMethodIcon(order.paymentMethod)}
                           <div>
-                            <p className="text-sm font-medium">{order.paymentMethod}</p>
-                            <Badge className={getPaymentStatusBadgeColor(order.paymentStatus)}>
+                            <p className="text-sm font-medium">
+                              {order.paymentMethod}
+                            </p>
+                            <Badge
+                              className={getPaymentStatusBadgeColor(
+                                order.paymentStatus
+                              )}
+                            >
                               {order.paymentStatus}
                             </Badge>
                             {order.transactionId && (
@@ -391,11 +443,16 @@ export const OrderManagement = () => {
                       </TableCell>
                       <TableCell>
                         <div className="space-y-1">
-                          {Object.entries(order.overallStatus).map(([status, count]) => (
-                            <Badge key={status} className={getStatusBadgeColor(status)}>
-                              {status}: {count}
-                            </Badge>
-                          ))}
+                          {Object.entries(order.overallStatus).map(
+                            ([status, count]) => (
+                              <Badge
+                                key={status}
+                                className={getStatusBadgeColor(status)}
+                              >
+                                {status}: {count}
+                              </Badge>
+                            )
+                          )}
                         </div>
                       </TableCell>
                       <TableCell>
@@ -409,11 +466,15 @@ export const OrderManagement = () => {
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
-                            <DropdownMenuItem onClick={() => handleViewOrder(order)}>
+                            <DropdownMenuItem
+                              onClick={() => handleViewOrder(order)}
+                            >
                               <Eye className="h-4 w-4 mr-2" />
                               View Details
                             </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => handleUpdateStatus(order)}>
+                            <DropdownMenuItem
+                              onClick={() => handleUpdateStatus(order)}
+                            >
                               <Settings className="h-4 w-4 mr-2" />
                               Manual Status Update
                             </DropdownMenuItem>
@@ -433,7 +494,7 @@ export const OrderManagement = () => {
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => setPage(prev => Math.max(1, prev - 1))}
+                onClick={() => setPage((prev) => Math.max(1, prev - 1))}
                 disabled={page === 1}
               >
                 Previous
@@ -444,7 +505,9 @@ export const OrderManagement = () => {
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => setPage(prev => Math.min(totalPages, prev + 1))}
+                onClick={() =>
+                  setPage((prev) => Math.min(totalPages, prev + 1))
+                }
                 disabled={page === totalPages}
               >
                 Next
