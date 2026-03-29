@@ -4,8 +4,72 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/png" href="/src/assets/logo.PNG" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Vibly - Online Shopping</title>
-    
+
+    <!-- Primary SEO -->
+    <title>Vibly - Shop Fashion & Lifestyle Online | Free Shipping ₹599+</title>
+    <meta name="description" content="Discover the latest fashion trends on Vibly. Shop men's & women's clothing, accessories and lifestyle products. Free shipping on orders above ₹599. Easy 7-day exchange policy." />
+    <meta name="keywords" content="online shopping india, fashion, clothing, vibly, buy clothes online, men fashion, women fashion, lifestyle" />
+    <meta name="robots" content="index, follow" />
+    <meta name="author" content="Vibly" />
+    <link rel="canonical" href="https://vibly.in/" />
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://vibly.in/" />
+    <meta property="og:site_name" content="Vibly" />
+    <meta property="og:title" content="Vibly - Shop Fashion & Lifestyle Online" />
+    <meta property="og:description" content="Discover the latest fashion trends. Shop men's & women's clothing with free shipping on orders above ₹599 and easy 7-day exchange." />
+    <meta property="og:image" content="https://vibly.in/og-image.jpg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:locale" content="en_IN" />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:site" content="@vibly_in" />
+    <meta name="twitter:title" content="Vibly - Shop Fashion & Lifestyle Online" />
+    <meta name="twitter:description" content="Discover the latest fashion trends. Free shipping on orders above ₹599." />
+    <meta name="twitter:image" content="https://vibly.in/og-image.jpg" />
+
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <meta name="theme-color" content="#000000" />
+
+    <!-- JSON-LD Structured Data: Organization -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "name": "Vibly",
+      "url": "https://vibly.in",
+      "logo": "https://vibly.in/src/assets/logo.PNG",
+      "sameAs": [],
+      "contactPoint": {
+        "@type": "ContactPoint",
+        "contactType": "customer support",
+        "availableLanguage": ["Hindi", "English"]
+      }
+    }
+    </script>
+
+    <!-- JSON-LD Structured Data: WebSite + Sitelinks Search Box -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "Vibly",
+      "url": "https://vibly.in",
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": {
+          "@type": "EntryPoint",
+          "urlTemplate": "https://vibly.in/products?search={search_term_string}"
+        },
+        "query-input": "required name=search_term_string"
+      }
+    }
+    </script>
+
     <!-- Razorpay SDK -->
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
   </head>

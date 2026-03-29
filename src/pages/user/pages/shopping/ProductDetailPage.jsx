@@ -66,6 +66,41 @@ const ProductDetailPage = () => {
     }
   }, [product?._id, product?.category?._id])
 
+  // SEO: Dynamic title and meta description per product
+  useEffect(() => {
+    if (!product) return
+
+    const prevTitle = document.title
+    const metaDesc = document.querySelector('meta[name="description"]')
+    const prevDesc = metaDesc?.getAttribute('content') || ''
+    const prevOgTitle = document.querySelector('meta[property="og:title"]')
+    const prevOgDesc = document.querySelector('meta[property="og:description"]')
+    const prevOgImg = document.querySelector('meta[property="og:image"]')
+    const prevTwTitle = document.querySelector('meta[name="twitter:title"]')
+    const prevTwDesc = document.querySelector('meta[name="twitter:description"]')
+    const prevTwImg = document.querySelector('meta[name="twitter:image"]')
+
+    const productImage = product?.variants?.[0]?.images?.[0]?.secure_url ||
+      product?.variants?.[0]?.orderImage?.secure_url || ''
+    const desc = product.description
+      ? product.description.substring(0, 160)
+      : `Buy ${product.name} on Vibly. Free shipping on orders above ₹599.`
+
+    document.title = `${product.name} | Vibly`
+    if (metaDesc) metaDesc.setAttribute('content', desc)
+    if (prevOgTitle) prevOgTitle.setAttribute('content', `${product.name} | Vibly`)
+    if (prevOgDesc) prevOgDesc.setAttribute('content', desc)
+    if (prevOgImg && productImage) prevOgImg.setAttribute('content', productImage)
+    if (prevTwTitle) prevTwTitle.setAttribute('content', `${product.name} | Vibly`)
+    if (prevTwDesc) prevTwDesc.setAttribute('content', desc)
+    if (prevTwImg && productImage) prevTwImg.setAttribute('content', productImage)
+
+    return () => {
+      document.title = prevTitle
+      if (metaDesc) metaDesc.setAttribute('content', prevDesc)
+    }
+  }, [product])
+
   const fetchProduct = async () => {
     try {
       setLoading(true)

@@ -1,0 +1,17 @@
+User-agent: *
+Allow: /
+Allow: /products
+Allow: /products/
+Allow: /terms-and-conditions
+Allow: /privacy-policy
+Allow: /refund
+Allow: /shipping
+Allow: /sizes
+
+Disallow: /admin/
+Disallow: /user/
+Disallow: /checkout
+Disallow: /payment/
+Disallow: /test/
+
+Sitemap: https://vibly.in/sitemap.xml

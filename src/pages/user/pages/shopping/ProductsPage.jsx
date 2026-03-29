@@ -192,6 +192,33 @@ const ProductsPage = () => {
     fetchFilterOptions();
   }, []);
 
+  // SEO: Dynamic page title based on active category / filters
+  useEffect(() => {
+    const prevTitle = document.title
+    const metaDesc = document.querySelector('meta[name="description"]')
+    const prevDesc = metaDesc?.getAttribute('content') || ''
+
+    let titlePart = 'All Products'
+    if (filters.gender && filters.gender !== 'all') {
+      titlePart = `${filters.gender}'s Fashion`
+    }
+    if (filters.isOnSale && filters.isOnSale !== 'all') {
+      titlePart = 'Sale Products'
+    }
+
+    document.title = `${titlePart} | Shop Online at Vibly`
+    if (metaDesc) {
+      metaDesc.setAttribute('content',
+        `Shop ${titlePart.toLowerCase()} on Vibly. Free shipping on orders above ₹599. Easy 7-day exchange policy.`
+      )
+    }
+
+    return () => {
+      document.title = prevTitle
+      if (metaDesc) metaDesc.setAttribute('content', prevDesc)
+    }
+  }, [filters.gender, filters.category, filters.isOnSale]);
+
   return (
     <div className="h-screen bg-background flex flex-col">
       <ViblyNavigation />
